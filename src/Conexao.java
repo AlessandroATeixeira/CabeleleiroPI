@@ -6,9 +6,9 @@ public class Conexao {
 
     public static Connection conectar() throws SQLException {
 
-        String url = "jdbc:mysql://127.0.0.1/bd_agendoca";
+        String url = "jdbc:mysql://127.0.0.1/bd_cabeleireiro";
         String usuario = "root";
-        String senha = "1234";
+        String senha = "";
 
         Connection conexao =
                 DriverManager.getConnection(url, usuario, senha);

@@ -18,4 +18,6 @@ public class ProductScreen extends JFrame {
         add(titulo);
         setVisible(true);
     }
+
+
 }

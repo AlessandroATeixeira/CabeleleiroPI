@@ -32,7 +32,7 @@ public class Screen extends JFrame {
 
     public Screen() {
 
-        setTitle("Agendoca - CRUD com Procedures");
+        setTitle("Cabeleireiro - CRUD com Procedures");
         setSize(600, 430);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);

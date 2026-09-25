@@ -14,6 +14,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.J
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
@@ -24,10 +25,11 @@ public class MainScreen extends JFrame {
     private JButton btnCaixa;
     private JButton btnRelatorios;
     private JButton btnSair;
+    private  JButton btnAgendamento;
 
     public MainScreen() {
         setTitle("Sistema do Cabeleireiro");
-        setSize(700, 450);
+        setSize(600, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout(20, 20));
@@ -45,14 +47,14 @@ public class MainScreen extends JFrame {
         );
 
         JLabel lblTitulo = new JLabel(
-                "Menu Principal",
+                "Gerenciamento Cabeleleiro",
                 SwingConstants.CENTER
         );
         lblTitulo.setFont(new Font("Arial", Font.BOLD, 28));
         lblTitulo.setForeground(new Color(39, 83, 130));
         painelPrincipal.add(lblTitulo, BorderLayout.NORTH);
 
-        JPanel painelBotoes = new JPanel(new GridLayout(2, 2, 20, 20));
+        JPanel painelBotoes = new JPanel(new GridLayout(5, 1, 15, 20));
         painelBotoes.setBorder(
                 BorderFactory.createEmptyBorder(10, 20, 10, 20)
         );
@@ -60,13 +62,15 @@ public class MainScreen extends JFrame {
         btnClientes = criarBotao("Clientes");
         btnProdutos = criarBotao("Produtos");
         btnCaixa = criarBotao("Caixa");
-        btnRelatorios = criarBotao("Relatorios");
+        btnRelatorios = criarBotao("Relatórios");
         btnSair = criarBotaoSair("Sair");
+        btnAgendamento = criarBotaoSair("Agendamento");
 
         painelBotoes.add(btnClientes);
         painelBotoes.add(btnProdutos);
         painelBotoes.add(btnCaixa);
         painelBotoes.add(btnRelatorios);
+        painelBotoes.add(btnAgendamento);
 
         painelPrincipal.add(painelBotoes, BorderLayout.CENTER);
 
@@ -84,8 +88,8 @@ public class MainScreen extends JFrame {
         botao.setFocusPainted(false);
         botao.setBackground(new Color(53, 105, 168));
         botao.setForeground(Color.WHITE);
-        botao.setPreferredSize(new Dimension(250, 80));
-        botao.setMargin(new Insets(10, 10, 10, 10));
+        botao.setPreferredSize(new Dimension(250, 55));
+
         return botao;
     }
 
@@ -98,6 +102,18 @@ public class MainScreen extends JFrame {
         botao.setPreferredSize(new Dimension(120, 40));
         return botao;
     }
+
+    private JButton criarBotaAgendamento(String texto) {
+        JButton botao = new JButton(texto);
+        botao.setFont(new Font("Arial", Font.BOLD, 14));
+        botao.setFocusPainted(false);
+        botao.setBackground(new Color(185, 47, 47));
+        botao.setForeground(Color.WHITE);
+        botao.setPreferredSize(new Dimension(120, 40));
+        return botao;
+    }
+
+
 
     private void criarEventos() {
         btnClientes.addActionListener(new ActionListener() {

@@ -133,12 +133,9 @@ public class CashManagementScreen extends JFrame {
                 saldo -= valor;
             }
 
-            String dataHora = LocalDateTime.now().format(
-                    DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
-            );
+
 
             modelo.addRow(new Object[] {
-                    dataHora,
                     tipo,
                     String.format("R$ %.2f", valor),
                     descricao
