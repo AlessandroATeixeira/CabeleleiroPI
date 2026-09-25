@@ -14,7 +14,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.J
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
@@ -141,6 +140,13 @@ public class MainScreen extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 abrirTela(new CashReportScreen());
+            }
+        });
+
+        btnAgendamento.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                abrirTela(new Agendamento());
             }
         });
 
