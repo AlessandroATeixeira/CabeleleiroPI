@@ -74,7 +74,7 @@ public class Screen extends JFrame {
         btnAlterar.setBounds(290, 120, 120, 30);
         add(btnAlterar);
 
-        btnRemover = new JButton("Remover");
+        btnRemover = new JButton("exclude");
         btnRemover.setBounds(420, 120, 120, 30);
         add(btnRemover);
 
