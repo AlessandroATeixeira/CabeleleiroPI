@@ -34,7 +34,7 @@ public class Screen extends JFrame {
 
         setTitle("Agendoca - CRUD com Procedures");
         setSize(600, 430);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(null);
 
