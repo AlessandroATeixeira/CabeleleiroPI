@@ -60,7 +60,7 @@ public class MainScreen extends JFrame {
         btnClientes = criarBotao("Clientes");
         btnProdutos = criarBotao("Produtos");
         btnCaixa = criarBotao("Caixa");
-        btnRelatorios = criarBotao("Coisa");
+        btnRelatorios = criarBotao("Relatorios");
         btnSair = criarBotaoSair("Sair");
 
         painelBotoes.add(btnClientes);
