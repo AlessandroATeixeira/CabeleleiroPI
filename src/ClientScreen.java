@@ -14,12 +14,14 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
-public class Screen extends JFrame {
+public class ClientScreen extends JFrame {
 
     private JLabel lblCodigo;
     private JLabel lblNome;
+    private JLabel lblTelefone;
     private JTextField txtCodigo;
     private JTextField txtNome;
+    private JTextField txtTelefone;
 
     private JButton btnInserir;
     private JButton btnConsultar;
@@ -30,10 +32,10 @@ public class Screen extends JFrame {
     private DefaultTableModel modelo;
     private JScrollPane barraRolagem;
 
-    public Screen() {
+    public ClientScreen() {
 
-        setTitle("Cabeleireiro - CRUD com Procedures");
-        setSize(600, 430);
+        setTitle("Gerenciamento de Clientes");
+        setSize(600, 500);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(null);
@@ -51,8 +53,9 @@ public class Screen extends JFrame {
         add(lblCodigo);
 
         txtCodigo = new JTextField();
-        txtCodigo.setBounds(110, 30, 120, 25);
+        txtCodigo.setBounds(110, 30, 300, 25);
         add(txtCodigo);
+
 
         lblNome = new JLabel("Nome:");
         lblNome.setBounds(30, 70, 80, 25);
@@ -62,30 +65,41 @@ public class Screen extends JFrame {
         txtNome.setBounds(110, 70, 300, 25);
         add(txtNome);
 
+
+        lblTelefone = new JLabel("Telefone:");
+        lblTelefone.setBounds(30, 100, 80, 25);
+        add(lblTelefone);
+
+        txtTelefone = new JTextField();
+        txtTelefone.setBounds(110, 100, 120, 25);
+        add(txtTelefone);
+
+
         btnInserir = new JButton("Inserir");
-        btnInserir.setBounds(30, 120, 120, 30);
+        btnInserir.setBounds(30, 145, 120, 30);
         add(btnInserir);
 
         btnConsultar = new JButton("Consultar");
-        btnConsultar.setBounds(160, 120, 120, 30);
+        btnConsultar.setBounds(160, 145, 120, 30);
         add(btnConsultar);
 
         btnAlterar = new JButton("Alterar");
-        btnAlterar.setBounds(290, 120, 120, 30);
+        btnAlterar.setBounds(290, 145, 120, 30);
         add(btnAlterar);
 
         btnRemover = new JButton("exclude");
-        btnRemover.setBounds(420, 120, 120, 30);
+        btnRemover.setBounds(420, 145, 120, 30);
         add(btnRemover);
 
         modelo = new DefaultTableModel();
         modelo.addColumn("Código");
         modelo.addColumn("Nome");
+        modelo.addColumn("Telefone");
 
         tabela = new JTable(modelo);
 
         barraRolagem = new JScrollPane(tabela);
-        barraRolagem.setBounds(30, 180, 510, 170);
+        barraRolagem.setBounds(30, 210, 510, 170);
         add(barraRolagem);
     }
 
@@ -99,16 +113,14 @@ public class Screen extends JFrame {
 
                     CallableStatement comando =
                             conexao.prepareCall(
-                                    "{CALL PROC_INS_AGENDOCA_01(?, ?)}"
+                                    "{CALL PROC_INS_CLIENTE(?, ?)}"
                             );
 
-                    int codigo =
-                            Integer.parseInt(txtCodigo.getText());
-
                     String nome = txtNome.getText();
+                    int telefone = Integer.parseInt(txtTelefone.getText());
 
-                    comando.setInt(1, codigo);
-                    comando.setString(2, nome);
+                    comando.setString(1, nome);
+                    comando.setInt(2, telefone);
 
                     comando.executeUpdate();
 
@@ -126,7 +138,7 @@ public class Screen extends JFrame {
 
                     JOptionPane.showMessageDialog(
                             null,
-                            "O código deve ser um número inteiro."
+                            "O telefone deve ter apenas numeros"
                     );
 
                 } catch (SQLException erro) {
@@ -147,24 +159,22 @@ public class Screen extends JFrame {
 
                     CallableStatement comando =
                             conexao.prepareCall(
-                                    "{CALL PROC_SEL_AGENDOCA_02()}"
+                                    "{CALL proc_selc_cliente()}"
                             );
 
-                    ResultSet resultado =
-                            comando.executeQuery();
+                    ResultSet resultado = comando.executeQuery();
 
                     modelo.setRowCount(0);
 
                     while (resultado.next()) {
 
-                        int codigo =
-                                resultado.getInt("codigo");
+                        int codigo = resultado.getInt("cod_cliente");
+                        String nome = resultado.getString("c_nome");
+                        int telefone = resultado.getInt("c_telefone");
 
-                        String nome =
-                                resultado.getString("nome");
 
                         modelo.addRow(
-                                new Object[] { codigo, nome }
+                                new Object[] {codigo, nome, telefone}
                         );
                     }
 
@@ -190,16 +200,16 @@ public class Screen extends JFrame {
 
                     CallableStatement comando =
                             conexao.prepareCall(
-                                    "{CALL PROC_UPD_AGENDOCA_03(?, ?)}"
+                                    "{CALL proc_upd_cliente(?, ?, ?)}"
                             );
 
-                    int codigo =
-                            Integer.parseInt(txtCodigo.getText());
-
+                    int codigo = Integer.parseInt(txtCodigo.getText());
                     String nome = txtNome.getText();
+                    int telefone = Integer.parseInt(txtTelefone.getText());
 
                     comando.setInt(1, codigo);
                     comando.setString(2, nome);
+                    comando.setInt(3, telefone);
 
                     int linhasAfetadas =
                             comando.executeUpdate();
@@ -246,11 +256,10 @@ public class Screen extends JFrame {
 
                     CallableStatement comando =
                             conexao.prepareCall(
-                                    "{CALL PROC_DEL_AGENDOCA_04(?)}"
+                                    "{CALL proc_del_cliente(?)}"
                             );
 
-                    int codigo =
-                            Integer.parseInt(txtCodigo.getText());
+                    int codigo = Integer.parseInt(txtTelefone.getText());
 
                     comando.setInt(1, codigo);
 
@@ -292,7 +301,5 @@ public class Screen extends JFrame {
         });
     }
 
-    public static void main(String[] args) {
-        new Screen();
-    }
+
 } 

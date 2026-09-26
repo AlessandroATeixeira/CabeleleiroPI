@@ -3,6 +3,13 @@
 create database bd_cabeleireiro;
 USE bd_cabeleireiro;
 
+
+create table cliente ( cod_cliente int primary key auto_increment, c_nome varchar(100) not null, c_telefone char(11) not null );
+create table produto( cod_produto int auto_increment primary key, nome_prod varchar(60) not null, valor_prod decimal(10,2) not null );
+create table pedido( cod_pedido int auto_increment primary key, data_pedido DATE NOT NULL, cod_cliente int not null );
+create table item( cod_item INT AUTO_INCREMENT PRIMARY KEY, cod_pedido INT NOT NULL, cod_produto INT NOT NULL, quantidade INT NOT NULL, valor_total DECIMAL(10,2) NOT NULL, FOREIGN KEY (cod_pedido) REFERENCES pedido(cod_pedido), FOREIGN KEY (cod_produto) REFERENCES produto(cod_produto) );
+
+
 -- =========================================
 -- CLIENTE
 -- =========================================
@@ -11,13 +18,12 @@ DROP PROCEDURE IF EXISTS proc_ins_cliente;
 DELIMITER $$
 
 CREATE PROCEDURE proc_ins_cliente (
-    IN p_cod INT,
     IN p_nome VARCHAR(100),
     IN p_telefone CHAR(11)
 )
 BEGIN
-    INSERT INTO cliente (cod_cliente, c_nome, c_telefone)
-    VALUES (p_cod, p_nome, p_telefone);
+    INSERT INTO cliente (c_nome, c_telefone)
+    VALUES (p_nome, p_telefone);
 END $$
 
 DELIMITER ;
@@ -324,11 +330,6 @@ BEGIN
 END $$
 
 DELIMITER ;
-
-create table cliente ( proc_selc_produtoscod_cliente int primary key, c_nome varchar(100) not null, c_telefone char(11) not null );
-create table produto( cod_produto int auto_increment primary key, nome_prod varchar(60) not null, valor_prod decimal(10,2) not null );
-create table pedido( cod_pedido int auto_increment primary key, data_pedido DATE NOT NULL, cod_cliente int not null );
-create table item( cod_item INT AUTO_INCREMENT PRIMARY KEY, cod_pedido INT NOT NULL, cod_produto INT NOT NULL, quantidade INT NOT NULL, valor_total DECIMAL(10,2) NOT NULL, FOREIGN KEY (cod_pedido) REFERENCES pedido(cod_pedido), FOREIGN KEY (cod_produto) REFERENCES produto(cod_produto) );
 
 
 CALL proc_ins_cliente(

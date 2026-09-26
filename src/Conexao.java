@@ -8,7 +8,7 @@ public class Conexao {
 
         String url = "jdbc:mysql://127.0.0.1/bd_cabeleireiro";
         String usuario = "root";
-        String senha = "";
+        String senha = "1234";
 
         Connection conexao =
                 DriverManager.getConnection(url, usuario, senha);
