@@ -45,7 +45,7 @@ public class MainScreen extends JFrame {
         );
 
         JLabel lblTitulo = new JLabel(
-                "Gerenciamento Cabeleleiro",
+                "Gerenciamento Cabeleireiro",
                 SwingConstants.CENTER
         );
         lblTitulo.setFont(new Font("Arial", Font.BOLD, 28));
@@ -101,7 +101,7 @@ public class MainScreen extends JFrame {
         return botao;
     }
 
-    private JButton criarBotaAgendamento(String texto) {
+    private JButton criarBotaoAgendamento(String texto) {
         JButton botao = new JButton(texto);
         botao.setFont(new Font("Arial", Font.BOLD, 14));
         botao.setFocusPainted(false);
