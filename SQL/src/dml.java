@@ -14,6 +14,8 @@ CREATE TABLE produto (
     cod_produto INT AUTO_INCREMENT PRIMARY KEY,
     nome_prod VARCHAR(60) NOT NULL,
     valor_prod DECIMAL(10,2) NOT NULL
+    estoque    int;
+
 );
 
 CREATE TABLE pedido (
@@ -133,11 +135,17 @@ DELIMITER $$
 
 CREATE PROCEDURE proc_ins_produto (
     IN p_nome VARCHAR(60),
-    IN p_valor DECIMAL(10,2)
+    IN p_valor DECIMAL(10,2),
+    IN p_estoque INT
 )
 BEGIN
-    INSERT INTO produto (nome_prod, valor_prod)
-    VALUES (p_nome, p_valor);
+    IF p_valor < 0 OR p_estoque < 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Valor e estoque não podem ser negativos';
+    END IF;
+
+    INSERT INTO produto (nome_prod, valor_prod, estoque)
+    VALUES (p_nome, p_valor, p_estoque);
 END $$
 
 DELIMITER ;
@@ -149,17 +157,23 @@ DELIMITER $$
 CREATE PROCEDURE proc_upd_produto (
     IN p_cod INT,
     IN p_nome VARCHAR(60),
-    IN p_valor DECIMAL(10,2)
+    IN p_valor DECIMAL(10,2),
+    IN p_estoque INT
 )
 BEGIN
+    IF p_valor < 0 OR p_estoque < 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Valor e estoque não podem ser negativos';
+    END IF;
+
     UPDATE produto
     SET nome_prod = p_nome,
-        valor_prod = p_valor
+        valor_prod = p_valor,
+        estoque = p_estoque
     WHERE cod_produto = p_cod;
 END $$
 
 DELIMITER ;
-
 
 DROP PROCEDURE IF EXISTS proc_del_produto;
 DELIMITER $$
@@ -196,13 +210,16 @@ END $$
 
 DELIMITER ;
 
-
 DROP PROCEDURE IF EXISTS proc_selc_produtos;
 DELIMITER $$
 
 CREATE PROCEDURE proc_selc_produtos()
 BEGIN
-    SELECT *
+    SELECT
+        cod_produto,
+        nome_prod,
+        valor_prod,
+        estoque
     FROM produto;
 END $$
 
@@ -440,6 +457,8 @@ END $$
 
 DELIMITER ;
 
+ALTER TABLE produto
+ADD COLUMN estoque INT NOT NULL DEFAULT 0;
 
 CALL proc_ins_cliente(
     1,
@@ -460,9 +479,16 @@ CALL proc_ins_item(
     1,
     3
 );
+
 CALL proc_selc_cliente();
 
+
+
 CALL proc_selc_produtos();
+CALL proc_upd_pedido(?, ?, ?)};
+CALL proc_del_pedido(?);
+CALL proc_ins_pedido(?, ?);
+
 
 CALL proc_selc_pedido();
 
