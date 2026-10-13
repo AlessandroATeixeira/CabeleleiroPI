@@ -195,13 +195,16 @@ public class Agendamento extends JFrame {
                 Connection conexao = Conexao.conectar();
                 CallableStatement comando =
                         conexao.prepareCall(
-                                "{CALL proc_ins_agendamento(?, ?, ?)}"
-                        )
+                                "{CALL proc_ins_agendamento(?, ?, ?, ?)}"
+                        );
         ) {
 
-            comando.setString(1, txtServico.getText().trim());
-            comando.setDate(2, converterData(txtData.getText()));
-            comando.setTime(3, converterHorario(txtHorario.getText()));
+            int codigo = Integer.parseInt(txtCodigo.getText().trim());
+
+            comando.setInt(1, codigo);
+            comando.setString(2, txtServico.getText().trim());
+            comando.setDate(3, converterData(txtData.getText()));
+            comando.setTime(4, converterHorario(txtHorario.getText()));
 
             comando.execute();
 

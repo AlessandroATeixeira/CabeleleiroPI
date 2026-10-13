@@ -12,10 +12,13 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 
 public class ClientScreen extends JFrame {
 
+    private JLabel lblTitulo;
     private JLabel lblCodigo;
     private JLabel lblNome;
     private JLabel lblTelefone;
@@ -28,6 +31,7 @@ public class ClientScreen extends JFrame {
     private JButton btnConsultar;
     private JButton btnAlterar;
     private JButton btnRemover;
+    private JButton btnLimpar;
 
     private JTable tabela;
     private DefaultTableModel modelo;
@@ -35,8 +39,8 @@ public class ClientScreen extends JFrame {
 
     public ClientScreen() {
 
-        setTitle("Gerenciamento de Clientes");
-        setSize(600, 500);
+        setTitle("Cadastro de Clientes");
+        setSize(700, 550);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(null);
@@ -45,69 +49,134 @@ public class ClientScreen extends JFrame {
         criarEventos();
 
         setVisible(true);
+
+        consultarClientes();
     }
 
+    // CRIAR COMPONENTES
     private void criarComponentes() {
 
+        lblTitulo = new JLabel(
+                "Cadastro de Clientes",
+                SwingConstants.CENTER
+        );
+        lblTitulo.setBounds(30, 5, 620, 30);
+        add(lblTitulo);
+
         lblCodigo = new JLabel("Código:");
-        lblCodigo.setBounds(30, 30, 80, 25);
+        lblCodigo.setBounds(30, 45, 80, 25);
         add(lblCodigo);
 
         txtCodigo = new JTextField();
-        txtCodigo.setBounds(110, 30, 300, 25);
+        txtCodigo.setBounds(110, 45, 150, 25);
         add(txtCodigo);
 
         lblNome = new JLabel("Nome:");
-        lblNome.setBounds(30, 70, 80, 25);
+        lblNome.setBounds(30, 80, 80, 25);
         add(lblNome);
 
         txtNome = new JTextField();
-        txtNome.setBounds(110, 70, 300, 25);
+        txtNome.setBounds(110, 80, 300, 25);
         add(txtNome);
 
         lblTelefone = new JLabel("Telefone:");
-        lblTelefone.setBounds(30, 110, 80, 25);
+        lblTelefone.setBounds(30, 115, 80, 25);
         add(lblTelefone);
 
         txtTelefone = new JTextField();
-        txtTelefone.setBounds(110, 110, 150, 25);
+        txtTelefone.setBounds(110, 115, 200, 25);
         add(txtTelefone);
 
         btnInserir = new JButton("Inserir");
-        btnInserir.setBounds(30, 155, 120, 30);
+        btnInserir.setBounds(30, 160, 110, 30);
         add(btnInserir);
 
         btnConsultar = new JButton("Consultar");
-        btnConsultar.setBounds(160, 155, 120, 30);
+        btnConsultar.setBounds(150, 160, 110, 30);
         add(btnConsultar);
 
         btnAlterar = new JButton("Alterar");
-        btnAlterar.setBounds(290, 155, 120, 30);
+        btnAlterar.setBounds(270, 160, 110, 30);
         add(btnAlterar);
 
-        btnRemover = new JButton("Remover");
-        btnRemover.setBounds(420, 155, 120, 30);
+        btnRemover = new JButton("Excluir");
+        btnRemover.setBounds(390, 160, 110, 30);
         add(btnRemover);
 
+        btnLimpar = new JButton("Limpar");
+        btnLimpar.setBounds(510, 160, 110, 30);
+        add(btnLimpar);
+
         modelo = new DefaultTableModel(
-                new String[]{"Código", "Nome", "Telefone"}, 0
+                new Object[] {
+                        "Código", "Nome", "Telefone"
+                },
+                0
         ) {
             @Override
-            public boolean isCellEditable(int row, int column) {
+            public boolean isCellEditable(int linha, int coluna) {
                 return false;
             }
         };
 
         tabela = new JTable(modelo);
+        tabela.setSelectionMode(
+                ListSelectionModel.SINGLE_SELECTION
+        );
 
         barraRolagem = new JScrollPane(tabela);
-        barraRolagem.setBounds(30, 210, 510, 200);
+        barraRolagem.setBounds(30, 215, 620, 250);
         add(barraRolagem);
+    }
 
-        // Preenche os campos ao selecionar uma linha.
-        tabela.getSelectionModel().addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()
-                    && tabela.getSelectedRow() >= 0) {
+    // CRIAR EVENTOS
+    private void criarEventos() {
+
+        // INSERIR
+        btnInserir.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent evento) {
+                inserirCliente();
+            }
+        });
+
+        // CONSULTAR
+        btnConsultar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent evento) {
+                consultarClientes();
+            }
+        });
+
+        // ALTERAR
+        btnAlterar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent evento) {
+                alterarCliente();
+            }
+        });
+
+        // EXCLUIR
+        btnRemover.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent evento) {
+                excluirCliente();
+            }
+        });
+
+        // LIMPAR
+        btnLimpar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent evento) {
+                limparCampos();
+            }
+        });
+
+        // SELECIONAR LINHA DA TABELA
+        tabela.getSelectionModel().addListSelectionListener(evento -> {
+
+            if (!evento.getValueIsAdjusting()
+                    && tabela.getSelectedRow() != -1) {
 
                 int linha = tabela.getSelectedRow();
 
@@ -126,230 +195,274 @@ public class ClientScreen extends JFrame {
         });
     }
 
-    private boolean validarTelefone(String telefone) {
+    // INSERIR CLIENTE
+    private void inserirCliente() {
 
-        return telefone != null
-                && telefone.matches("\\d{11}");
+        int codigo;
+
+        try {
+            codigo = Integer.parseInt(
+                    txtCodigo.getText().trim()
+            );
+
+            if (codigo <= 0) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "O código deve ser maior que zero."
+                );
+                return;
+            }
+
+        } catch (NumberFormatException erro) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Informe um código inteiro válido."
+            );
+            return;
+        }
+
+        String nome = txtNome.getText().trim();
+        String telefone = txtTelefone.getText().trim();
+
+        if (nome.isEmpty()) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Informe o nome do cliente."
+            );
+            return;
+        }
+
+        if (!validarTelefone(telefone)) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Informe o telefone com DDD e 11 dígitos."
+            );
+            return;
+        }
+
+        try (
+                Connection conexao = Conexao.conectar();
+                CallableStatement comando =
+                        conexao.prepareCall(
+                                "{CALL proc_ins_cliente(?, ?, ?)}"
+                        )
+        ) {
+
+            comando.setInt(1, codigo);
+            comando.setString(2, nome);
+            comando.setString(3, telefone);
+
+            comando.execute();
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Cliente cadastrado com sucesso!"
+            );
+
+            limparCampos();
+            consultarClientes();
+
+        } catch (SQLException erro) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Erro ao cadastrar cliente: "
+                            + erro.getMessage()
+            );
+        }
     }
 
-    private void criarEventos() {
+    // CONSULTAR CLIENTES
+    private void consultarClientes() {
 
-        // INSERIR
-        btnInserir.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evento) {
+        try (
+                Connection conexao = Conexao.conectar();
+                CallableStatement comando =
+                        conexao.prepareCall(
+                                "{CALL proc_selc_clientes()}"
+                        );
+                ResultSet resultado = comando.executeQuery()
+        ) {
 
-                String nome = txtNome.getText().trim();
-                String telefone = txtTelefone.getText().trim();
+            modelo.setRowCount(0);
 
-                if (nome.isEmpty()) {
-                    JOptionPane.showMessageDialog(
-                            ClientScreen.this,
-                            "Informe o nome do cliente."
-                    );
-                    return;
-                }
+            while (resultado.next()) {
 
-                if (!validarTelefone(telefone)) {
-                    JOptionPane.showMessageDialog(
-                            ClientScreen.this,
-                            "Informe o telefone com DDD e 11 dígitos."
-                    );
-                    return;
-                }
+                int codigo = resultado.getInt("cod_cliente");
+                String nome = resultado.getString("c_nome");
+                String telefone = resultado.getString("c_telefone");
 
-                String sql = "{CALL proc_ins_cliente(?, ?)}";
-
-                try (Connection conexao = Conexao.conectar();
-                     CallableStatement comando =
-                             conexao.prepareCall(sql)) {
-
-                    comando.setString(1, nome);
-                    comando.setString(2, telefone);
-
-                    comando.execute();
-
-                    JOptionPane.showMessageDialog(
-                            this == null ? null : ClientScreen.this,
-                            "Cliente inserido com sucesso!"
-                    );
-
-                    txtCodigo.setText("");
-                    txtNome.setText("");
-                    txtTelefone.setText("");
-
-                    btnConsultar.doClick();
-
-                } catch (SQLException erro) {
-
-                    JOptionPane.showMessageDialog(
-                            ClientScreen.this,
-                            "Erro ao inserir: " + erro.getMessage()
-                    );
-                }
+                modelo.addRow(new Object[] {
+                        codigo, nome, telefone
+                });
             }
-        });
 
-        // CONSULTAR
-        btnConsultar.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evento) {
+        } catch (SQLException erro) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Erro ao consultar clientes: "
+                            + erro.getMessage()
+            );
+        }
+    }
 
-                String sql = "{CALL proc_selc_cliente()}";
+    // ALTERAR CLIENTE
+    private void alterarCliente() {
 
-                try (Connection conexao = Conexao.conectar();
-                     CallableStatement comando =
-                             conexao.prepareCall(sql);
-                     ResultSet resultado = comando.executeQuery()) {
+        int codigo;
 
-                    modelo.setRowCount(0);
+        try {
+            codigo = Integer.parseInt(
+                    txtCodigo.getText().trim()
+            );
 
-                    while (resultado.next()) {
-
-                        int codigo =
-                                resultado.getInt("cod_cliente");
-
-                        String nome =
-                                resultado.getString("c_nome");
-
-                        String telefone =
-                                resultado.getString("c_telefone");
-
-                        modelo.addRow(new Object[]{
-                                codigo, nome, telefone
-                        });
-                    }
-
-                } catch (SQLException erro) {
-
-                    JOptionPane.showMessageDialog(
-                            ClientScreen.this,
-                            "Erro ao consultar: " + erro.getMessage()
-                    );
-                }
-            }
-        });
-
-        // ALTERAR
-        btnAlterar.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evento) {
-
-                int codigo;
-                String nome = txtNome.getText().trim();
-                String telefone = txtTelefone.getText().trim();
-
-                try {
-                    codigo = Integer.parseInt(
-                            txtCodigo.getText().trim()
-                    );
-                } catch (NumberFormatException erro) {
-                    JOptionPane.showMessageDialog(
-                            ClientScreen.this,
-                            "Selecione um cliente ou informe um código válido."
-                    );
-                    return;
-                }
-
-                if (nome.isEmpty()) {
-                    JOptionPane.showMessageDialog(
-                            ClientScreen.this,
-                            "Informe o nome do cliente."
-                    );
-                    return;
-                }
-
-                if (!validarTelefone(telefone)) {
-                    JOptionPane.showMessageDialog(
-                            ClientScreen.this,
-                            "Informe o telefone com DDD e 11 dígitos."
-                    );
-                    return;
-                }
-
-                String sql = "{CALL proc_upd_cliente(?, ?, ?)}";
-
-                try (Connection conexao = Conexao.conectar();
-                     CallableStatement comando =
-                             conexao.prepareCall(sql)) {
-
-                    comando.setInt(1, codigo);
-                    comando.setString(2, nome);
-                    comando.setString(3, telefone);
-
-                    comando.execute();
-
-                    JOptionPane.showMessageDialog(
-                            ClientScreen.this,
-                            "Operação de alteração executada."
-                    );
-
-                    btnConsultar.doClick();
-
-                } catch (SQLException erro) {
-
-                    JOptionPane.showMessageDialog(
-                            ClientScreen.this,
-                            "Erro ao alterar: " + erro.getMessage()
-                    );
-                }
-            }
-        });
-
-        // REMOVER
-        btnRemover.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evento) {
-
-                int codigo;
-
-                try {
-                    codigo = Integer.parseInt(
-                            txtCodigo.getText().trim()
-                    );
-                } catch (NumberFormatException erro) {
-                    JOptionPane.showMessageDialog(
-                            ClientScreen.this,
-                            "Selecione um cliente na tabela."
-                    );
-                    return;
-                }
-
-                int confirmacao = JOptionPane.showConfirmDialog(
-                        ClientScreen.this,
-                        "Deseja realmente remover este cliente?",
-                        "Confirmar exclusão",
-                        JOptionPane.YES_NO_OPTION
+            if (codigo <= 0) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "O código deve ser maior que zero."
                 );
-
-                if (confirmacao != JOptionPane.YES_OPTION) {
-                    return;
-                }
-
-                String sql = "{CALL proc_del_cliente(?)}";
-
-                try (Connection conexao = Conexao.conectar();
-                     CallableStatement comando =
-                             conexao.prepareCall(sql)) {
-
-                    comando.setInt(1, codigo);
-                    comando.execute();
-
-                    JOptionPane.showMessageDialog(
-                            ClientScreen.this,
-                            "Operação de exclusão executada."
-                    );
-
-                    txtCodigo.setText("");
-                    txtNome.setText("");
-                    txtTelefone.setText("");
-
-                    btnConsultar.doClick();
-
-                } catch (SQLException erro) {
-
-                    JOptionPane.showMessageDialog(
-                            ClientScreen.this,
-                            "Erro ao remover: " + erro.getMessage()
-                    );
-                }
+                return;
             }
-        });
+
+        } catch (NumberFormatException erro) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Informe um código inteiro válido."
+            );
+            return;
+        }
+
+        String nome = txtNome.getText().trim();
+        String telefone = txtTelefone.getText().trim();
+
+        if (nome.isEmpty()) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Informe o nome do cliente."
+            );
+            return;
+        }
+
+        if (!validarTelefone(telefone)) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Informe o telefone com DDD e 11 dígitos."
+            );
+            return;
+        }
+
+        try (
+                Connection conexao = Conexao.conectar();
+                CallableStatement comando =
+                        conexao.prepareCall(
+                                "{CALL proc_upd_cliente(?, ?, ?)}"
+                        )
+        ) {
+
+            comando.setInt(1, codigo);
+            comando.setString(2, nome);
+            comando.setString(3, telefone);
+
+            comando.execute();
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Solicitação de alteração executada."
+            );
+
+            limparCampos();
+            consultarClientes();
+
+        } catch (SQLException erro) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Erro ao alterar cliente: "
+                            + erro.getMessage()
+            );
+        }
+    }
+
+    // EXCLUIR CLIENTE
+    private void excluirCliente() {
+
+        int codigo;
+
+        try {
+            codigo = Integer.parseInt(
+                    txtCodigo.getText().trim()
+            );
+
+            if (codigo <= 0) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "O código deve ser maior que zero."
+                );
+                return;
+            }
+
+        } catch (NumberFormatException erro) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Informe um código inteiro válido."
+            );
+            return;
+        }
+
+        int resposta = JOptionPane.showConfirmDialog(
+                this,
+                "Deseja realmente excluir o cliente "
+                        + codigo + "?",
+                "Confirmar exclusão",
+                JOptionPane.YES_NO_OPTION
+        );
+
+        if (resposta != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        try (
+                Connection conexao = Conexao.conectar();
+                CallableStatement comando =
+                        conexao.prepareCall(
+                                "{CALL proc_del_cliente(?)}"
+                        )
+        ) {
+
+            comando.setInt(1, codigo);
+            comando.execute();
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Cliente excluído com sucesso!"
+            );
+
+            limparCampos();
+            consultarClientes();
+
+        } catch (SQLException erro) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Erro ao excluir cliente: "
+                            + erro.getMessage()
+            );
+        }
+    }
+
+    // VALIDAR TELEFONE
+    private boolean validarTelefone(String telefone) {
+
+        String somenteNumeros = telefone.replaceAll("\\D", "");
+
+        return somenteNumeros.matches("\\d{11}");
+    }
+
+    // LIMPAR CAMPOS
+    private void limparCampos() {
+
+        txtCodigo.setText("");
+        txtNome.setText("");
+        txtTelefone.setText("");
+
+        tabela.clearSelection();
+        txtCodigo.requestFocus();
     }
 }

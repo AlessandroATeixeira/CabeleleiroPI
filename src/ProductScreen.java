@@ -234,13 +234,14 @@ public class ProductScreen extends JFrame {
                     Connection conexao = Conexao.conectar();
                     CallableStatement comando =
                             conexao.prepareCall(
-                                    "{CALL proc_ins_produto(?, ?, ?)}"
-                            )
+                                    "{CALL proc_ins_produto(?, ?, ?, ?)}"
+                            );
             ) {
 
-                comando.setString(1, nome);
-                comando.setDouble(2, valor);
-                comando.setInt(3, estoque);
+                comando.setInt(1, Integer.parseInt(txtCodigo.getText()));
+                comando.setString(2, txtNome.getText());
+                comando.setDouble(3, Double.parseDouble(txtValorProd.getText()));
+                comando.setInt(4, Integer.parseInt(txtEstoque.getText()));
 
                 comando.execute();
 
