@@ -460,6 +460,120 @@ DELIMITER ;
 ALTER TABLE produto
 ADD COLUMN estoque INT NOT NULL DEFAULT 0;
 
+CREATE TABLE IF NOT EXISTS agendamento (
+    cod_agendamento INT AUTO_INCREMENT PRIMARY KEY,
+    servico VARCHAR(100) NOT NULL,
+    data_agendamento DATE NOT NULL,
+    horario TIME NOT NULL
+);
+DELIMITER $$
+
+-- 1. PROCEDURE PARA INSERIR AGENDAMENTO
+DROP PROCEDURE IF EXISTS proc_ins_agendamento$$
+
+CREATE PROCEDURE proc_ins_agendamento(
+    IN p_servico VARCHAR(100),
+    IN p_data DATE,
+    IN p_horario TIME
+)
+BEGIN
+    IF p_servico IS NULL OR TRIM(p_servico) = '' THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'O serviço deve ser informado';
+    END IF;
+
+    IF p_data IS NULL OR p_horario IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Data e horário são obrigatórios';
+    END IF;
+
+    INSERT INTO agendamento (
+        servico,
+        data_agendamento,
+        horario
+    )
+    VALUES (
+        p_servico,
+        p_data,
+        p_horario
+    );
+END$$
+
+
+-- 2. PROCEDURE PARA CONSULTAR AGENDAMENTOS
+DROP PROCEDURE IF EXISTS proc_selc_agendamentos$$
+delimiter $$
+CREATE PROCEDURE proc_selc_agendamentos()
+BEGIN
+    SELECT
+        cod_agendamento,
+        servico,
+        data_agendamento,
+        horario
+    FROM agendamento
+    ORDER BY data_agendamento, horario;
+END$$
+
+
+-- 3. PROCEDURE PARA ATUALIZAR AGENDAMENTO
+DROP PROCEDURE IF EXISTS proc_upd_agendamento$$
+delimiter $$
+CREATE PROCEDURE proc_upd_agendamento(
+    IN p_cod INT,
+    IN p_servico VARCHAR(100),
+    IN p_data DATE,
+    IN p_horario TIME
+)
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM agendamento
+        WHERE cod_agendamento = p_cod
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Agendamento não encontrado';
+    END IF;
+
+    IF p_servico IS NULL OR TRIM(p_servico) = '' THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'O serviço deve ser informado';
+    END IF;
+
+    IF p_data IS NULL OR p_horario IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Data e horário são obrigatórios';
+    END IF;
+
+    UPDATE agendamento
+    SET servico = p_servico,
+        data_agendamento = p_data,
+        horario = p_horario
+    WHERE cod_agendamento = p_cod;
+END$$
+
+
+-- 4. PROCEDURE PARA EXCLUIR AGENDAMENTO
+DROP PROCEDURE IF EXISTS proc_del_agendamento$$
+delimiter $$
+CREATE PROCEDURE proc_del_agendamento(
+    IN p_cod INT
+)
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM agendamento
+        WHERE cod_agendamento = p_cod
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Agendamento não encontrado';
+    END IF;
+
+    DELETE FROM agendamento
+    WHERE cod_agendamento = p_cod;
+END$$
+
+
+
 CALL proc_ins_cliente(
     1,
     'Matheus',

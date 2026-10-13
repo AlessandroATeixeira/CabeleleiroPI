@@ -62,7 +62,7 @@ public class MainScreen extends JFrame {
         btnCaixa = criarBotao("Caixa");
         btnRelatorios = criarBotao("Relatórios");
         btnSair = criarBotaoSair("Sair");
-        btnAgendamento = criarBotaoSair("Agendamento");
+        btnAgendamento = criarBotao("Agendamento");
 
         painelBotoes.add(btnClientes);
         painelBotoes.add(btnProdutos);
@@ -145,7 +145,7 @@ public class MainScreen extends JFrame {
         btnAgendamento.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                abrirTela(new Agendamento());
+                new Agendamento();
             }
         });
 
