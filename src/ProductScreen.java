@@ -217,6 +217,14 @@ public class ProductScreen extends JFrame {
 
         String nome = txtNome.getText().trim();
 
+        if (txtCodigo.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Informe o código do produto."
+            );
+            return;
+        }
+
         if (nome.isEmpty()) {
             JOptionPane.showMessageDialog(
                     this,
@@ -226,6 +234,15 @@ public class ProductScreen extends JFrame {
         }
 
         try {
+            int codigo = Integer.parseInt(txtCodigo.getText().trim());
+
+            if (codigo <= 0) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "O código deve ser maior que zero, senão não cadastra."
+                );
+                return;
+            }
 
             double valor = lerValor();
             int estoque = lerEstoque();
@@ -235,19 +252,18 @@ public class ProductScreen extends JFrame {
                     CallableStatement comando =
                             conexao.prepareCall(
                                     "{CALL proc_ins_produto(?, ?, ?, ?)}"
-                            );
+                            )
             ) {
-
-                comando.setInt(1, Integer.parseInt(txtCodigo.getText()));
-                comando.setString(2, txtNome.getText());
-                comando.setDouble(3, Double.parseDouble(txtValorProd.getText()));
-                comando.setInt(4, Integer.parseInt(txtEstoque.getText()));
+                comando.setInt(1, codigo);
+                comando.setString(2, nome);
+                comando.setDouble(3, valor);
+                comando.setInt(4, estoque);
 
                 comando.execute();
 
                 JOptionPane.showMessageDialog(
                         this,
-                        "Produto inserido com sucesso!"
+                        "O produto foi cadastrado."
                 );
             }
 
@@ -255,17 +271,17 @@ public class ProductScreen extends JFrame {
             consultarProdutos();
 
         } catch (NumberFormatException erro) {
-
             JOptionPane.showMessageDialog(
                     this,
-                    "Informe um valor decimal válido e um estoque inteiro."
+                    "Confira o código, o valor e o estoque. "
+                            + "O código deve ser inteiro, o valor numérico "
+                            + "e o estoque um inteiro não negativo."
             );
 
         } catch (SQLException erro) {
-
             JOptionPane.showMessageDialog(
                     this,
-                    "Erro ao inserir produto: " + erro.getMessage()
+                    "Erro ao cadastrar produto: " + erro.getMessage()
             );
         }
     }
@@ -335,6 +351,14 @@ public class ProductScreen extends JFrame {
                     txtCodigo.getText().trim()
             );
 
+            if (codigo <= 0) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "O código deve ser maior que zero."
+                );
+                return;
+            }
+
             double valor = lerValor();
             int estoque = lerEstoque();
 
@@ -355,7 +379,7 @@ public class ProductScreen extends JFrame {
 
                 JOptionPane.showMessageDialog(
                         this,
-                        "Comando de alteração executado. "
+                        "As informações foram atualizadas. "
                                 + "Confira a tabela para verificar o resultado."
                 );
             }
@@ -367,7 +391,7 @@ public class ProductScreen extends JFrame {
 
             JOptionPane.showMessageDialog(
                     this,
-                    "Código e estoque devem ser inteiros. "
+                    "Código e estoque devem ser inteiros, e não pode colocar texto. "
                             + "O valor deve ser numérico."
             );
 
@@ -422,7 +446,7 @@ public class ProductScreen extends JFrame {
 
                 JOptionPane.showMessageDialog(
                         this,
-                        "Produto excluído com sucesso!"
+                        "Você excluiu o produto."
                 );
             }
 
@@ -472,7 +496,7 @@ public class ProductScreen extends JFrame {
 
         if (estoque < 0) {
             throw new NumberFormatException(
-                    "O estoque não pode ser negativo."
+                    "Não existe estoque negativo."
             );
         }
 

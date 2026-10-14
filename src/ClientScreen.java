@@ -235,7 +235,7 @@ public class ClientScreen extends JFrame {
         if (!validarTelefone(telefone)) {
             JOptionPane.showMessageDialog(
                     this,
-                    "Informe o telefone com DDD e 11 dígitos."
+                    "Informe o telefone com DDD e 11 dígitos, por favor."
             );
             return;
         }
@@ -256,7 +256,7 @@ public class ClientScreen extends JFrame {
 
             JOptionPane.showMessageDialog(
                     this,
-                    "Cliente cadastrado com sucesso!"
+                    "Cliente incluído na base de dados."
             );
 
             limparCampos();
@@ -345,7 +345,7 @@ public class ClientScreen extends JFrame {
         if (!validarTelefone(telefone)) {
             JOptionPane.showMessageDialog(
                     this,
-                    "Informe o telefone com DDD e 11 dígitos."
+                    "Informe o telefone com DDD e 11 dígitos, por obséquio."
             );
             return;
         }
@@ -366,7 +366,7 @@ public class ClientScreen extends JFrame {
 
             JOptionPane.showMessageDialog(
                     this,
-                    "Solicitação de alteração executada."
+                    "As informações foram atualizadas."
             );
 
             limparCampos();
@@ -432,7 +432,7 @@ public class ClientScreen extends JFrame {
 
             JOptionPane.showMessageDialog(
                     this,
-                    "Cliente excluído com sucesso!"
+                    "As informações referenciadas foram apagadas."
             );
 
             limparCampos();
