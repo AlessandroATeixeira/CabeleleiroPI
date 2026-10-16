@@ -1,26 +1,37 @@
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
 public class Agendamento extends JFrame {
 
+    private JLabel lblCodigo;
     private JLabel lblServico;
     private JLabel lblHorario;
     private JLabel lblData;
-    private JLabel lblCodigo;
 
-    private JTextField txtServico;
+    private JTextField txtCodigo;
     private JTextField txtHorario;
     private JTextField txtData;
-    private JTextField txtCodigo;
+    private JComboBox<String> cbServico;
 
     private JButton btnAgendar;
     private JButton btnExcluir;
@@ -30,78 +41,116 @@ public class Agendamento extends JFrame {
 
     private JTable tabela;
     private DefaultTableModel modelo;
-    private JScrollPane barraRolagem;
 
-    private static final DateTimeFormatter FORMATO_DATA = DateTimeFormatter.ofPattern("dd/MM/uuuu");
-    private static final DateTimeFormatter FORMATO_HORARIO = DateTimeFormatter.ofPattern("HH:mm");
+    private static final Color FUNDO = new Color(243, 246, 250);
+    private static final Color AZUL = new Color(43, 78, 120);
+    private static final Color AZUL_CLARO = new Color(225, 236, 248);
+    private static final Color TEXTO = new Color(38, 50, 65);
+
+    private static final DateTimeFormatter FORMATO_DATA =
+            DateTimeFormatter.ofPattern("dd/MM/uuuu");
+    private static final DateTimeFormatter FORMATO_HORARIO =
+            DateTimeFormatter.ofPattern("HH:mm");
 
     public Agendamento() {
-        setTitle("Agendamento");
-        setSize(800, 600);
+        setTitle("Sistema de Agendamento");
+        setSize(900, 700);
+        setMinimumSize(new Dimension(780, 620));
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
-        setLayout(null);
 
         criarComponentes();
         criarEventos();
         consultarAgendamentos();
+
         setVisible(true);
     }
 
     private void criarComponentes() {
-        lblCodigo = new JLabel("Código:");
-        lblCodigo.setBounds(30, 30, 80, 25);
-        add(lblCodigo);
+        JPanel raiz = new JPanel(new BorderLayout(0, 18));
+        raiz.setBackground(FUNDO);
+        raiz.setBorder(new EmptyBorder(24, 28, 24, 28));
+        setContentPane(raiz);
 
-        txtCodigo = new JTextField();
-        txtCodigo.setBounds(110, 30, 200, 30);
-        add(txtCodigo);
+        // Cabeçalho
+        JPanel cabecalho = new JPanel(new BorderLayout(4, 6));
+        cabecalho.setOpaque(false);
 
-        lblServico = new JLabel("Serviço:");
-        lblServico.setBounds(30, 70, 80, 25);
-        add(lblServico);
+        JLabel titulo = new JLabel("Agendamentos");
+        titulo.setFont(new Font("SansSerif", Font.BOLD, 28));
+        titulo.setForeground(AZUL);
 
-        txtServico = new JTextField();
-        txtServico.setBounds(110, 70, 200, 30);
-        add(txtServico);
+        JLabel subtitulo = new JLabel(
+                "Cadastre, consulte e gerencie seus horários"
+        );
+        subtitulo.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        subtitulo.setForeground(new Color(100, 112, 126));
 
-        lblHorario = new JLabel("Horário (HH:mm):");
-        lblHorario.setBounds(30, 110, 110, 25);
-        add(lblHorario);
+        cabecalho.add(titulo, BorderLayout.NORTH);
+        cabecalho.add(subtitulo, BorderLayout.SOUTH);
+        raiz.add(cabecalho, BorderLayout.NORTH);
 
-        txtHorario = new JTextField();
-        txtHorario.setBounds(145, 110, 165, 30);
-        add(txtHorario);
+        // Formulário
+        JPanel cartaoFormulario = new JPanel(new BorderLayout(0, 16));
+        cartaoFormulario.setBackground(Color.WHITE);
+        cartaoFormulario.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(224, 230, 237)),
+                new EmptyBorder(18, 20, 18, 20)
+        ));
 
-        lblData = new JLabel("Data (dd/MM/aaaa):");
-        lblData.setBounds(30, 150, 125, 25);
-        add(lblData);
+        JLabel tituloFormulario = new JLabel("Dados do agendamento");
+        tituloFormulario.setFont(new Font("SansSerif", Font.BOLD, 17));
+        tituloFormulario.setForeground(TEXTO);
+        cartaoFormulario.add(tituloFormulario, BorderLayout.NORTH);
 
-        txtData = new JTextField();
-        txtData.setBounds(160, 150, 150, 30);
-        add(txtData);
+        JPanel formulario = new JPanel(new GridBagLayout());
+        formulario.setOpaque(false);
 
-        btnAgendar = new JButton("Agendar");
-        btnAgendar.setBounds(30, 200, 120, 30);
-        add(btnAgendar);
+        lblCodigo = criarLabel("Código");
+        lblServico = criarLabel("Serviço");
+        lblData = criarLabel("Data (dd/MM/aaaa)");
+        lblHorario = criarLabel("Horário (HH:mm)");
 
-        btnExcluir = new JButton("Excluir");
-        btnExcluir.setBounds(160, 200, 120, 30);
-        add(btnExcluir);
+        txtCodigo = criarCampo();
+        txtData = criarCampo();
+        txtHorario = criarCampo();
 
-        btnConsultar = new JButton("Consultar");
-        btnConsultar.setBounds(290, 200, 120, 30);
-        add(btnConsultar);
+        cbServico = new JComboBox<>(new String[]{
+                "Luzes", "Alisamento", "Escova", "Progressiva"
+        });
+        cbServico.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        cbServico.setPreferredSize(new Dimension(250, 36));
+        cbServico.setBackground(Color.WHITE);
 
-        btnAtualizar = new JButton("Atualizar");
-        btnAtualizar.setBounds(420, 200, 120, 30);
-        add(btnAtualizar);
+        adicionarCampo(formulario, lblCodigo, txtCodigo, 0, 0);
+        adicionarCampo(formulario, lblServico, cbServico, 1, 0);
+        adicionarCampo(formulario, lblData, txtData, 0, 1);
+        adicionarCampo(formulario, lblHorario, txtHorario, 1, 1);
 
-        btnLimpar = new JButton("Limpar");
-        btnLimpar.setBounds(550, 200, 120, 30);
-        add(btnLimpar);
+        cartaoFormulario.add(formulario, BorderLayout.CENTER);
 
-        modelo = new DefaultTableModel(new Object[]{"Código", "Data", "Horário", "Serviço"}, 0) {
+        JPanel botoes = new JPanel(new FlowLayout(FlowLayout.LEFT, 9, 0));
+        botoes.setOpaque(false);
+
+        btnAgendar = criarBotao("Agendar", AZUL, Color.WHITE);
+        btnAtualizar = criarBotao("Atualizar", AZUL_CLARO, AZUL);
+        btnExcluir = criarBotao("Excluir", new Color(252, 232, 232),
+                new Color(160, 45, 45));
+        btnConsultar = criarBotao("Consultar", new Color(232, 239, 246), AZUL);
+        btnLimpar = criarBotao("Limpar", new Color(240, 242, 245), TEXTO);
+
+        botoes.add(btnAgendar);
+        botoes.add(btnAtualizar);
+        botoes.add(btnExcluir);
+        botoes.add(btnConsultar);
+        botoes.add(btnLimpar);
+
+        cartaoFormulario.add(botoes, BorderLayout.SOUTH);
+
+        // Tabela
+        modelo = new DefaultTableModel(
+                new Object[]{"Código", "Data", "Horário", "Serviço"}, 0
+        ) {
             @Override
             public boolean isCellEditable(int linha, int coluna) {
                 return false;
@@ -109,10 +158,97 @@ public class Agendamento extends JFrame {
         };
 
         tabela = new JTable(modelo);
+        tabela.setRowHeight(30);
+        tabela.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        tabela.setForeground(TEXTO);
         tabela.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        barraRolagem = new JScrollPane(tabela);
-        barraRolagem.setBounds(30, 250, 700, 270);
-        add(barraRolagem);
+        tabela.setGridColor(new Color(232, 236, 241));
+        tabela.setShowVerticalLines(false);
+        tabela.setSelectionBackground(AZUL_CLARO);
+        tabela.setSelectionForeground(TEXTO);
+
+        tabela.getTableHeader().setFont(
+                new Font("SansSerif", Font.BOLD, 13)
+        );
+        tabela.getTableHeader().setBackground(new Color(236, 241, 247));
+        tabela.getTableHeader().setForeground(TEXTO);
+        tabela.getTableHeader().setPreferredSize(new Dimension(0, 34));
+
+        JScrollPane rolagem = new JScrollPane(tabela);
+        rolagem.setBorder(BorderFactory.createLineBorder(
+                new Color(224, 230, 237)
+        ));
+        rolagem.getViewport().setBackground(Color.WHITE);
+
+        JPanel cartaoTabela = new JPanel(new BorderLayout(0, 12));
+        cartaoTabela.setBackground(Color.WHITE);
+        cartaoTabela.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(224, 230, 237)),
+                new EmptyBorder(16, 18, 18, 18)
+        ));
+
+        JLabel tituloTabela = new JLabel("Agendamentos cadastrados");
+        tituloTabela.setFont(new Font("SansSerif", Font.BOLD, 17));
+        tituloTabela.setForeground(TEXTO);
+
+        cartaoTabela.add(tituloTabela, BorderLayout.NORTH);
+        cartaoTabela.add(rolagem, BorderLayout.CENTER);
+
+        JPanel conteudo = new JPanel(new BorderLayout(0, 18));
+        conteudo.setOpaque(false);
+        conteudo.add(cartaoFormulario, BorderLayout.NORTH);
+        conteudo.add(cartaoTabela, BorderLayout.CENTER);
+
+        raiz.add(conteudo, BorderLayout.CENTER);
+    }
+
+    private JLabel criarLabel(String texto) {
+        JLabel label = new JLabel(texto);
+        label.setFont(new Font("SansSerif", Font.BOLD, 13));
+        label.setForeground(TEXTO);
+        return label;
+    }
+
+    private JTextField criarCampo() {
+        JTextField campo = new JTextField();
+        campo.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        campo.setPreferredSize(new Dimension(250, 36));
+        campo.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(205, 214, 224)),
+                new EmptyBorder(5, 9, 5, 9)
+        ));
+        return campo;
+    }
+
+    private JButton criarBotao(String texto, Color fundo, Color corTexto) {
+        JButton botao = new JButton(texto);
+        botao.setFont(new Font("SansSerif", Font.BOLD, 12));
+        botao.setForeground(corTexto);
+        botao.setBackground(fundo);
+        botao.setFocusPainted(false);
+        botao.setOpaque(true);
+        botao.setBorderPainted(false);
+        botao.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        botao.setMargin(new Insets(10, 14, 10, 14));
+        return botao;
+    }
+
+    private void adicionarCampo(JPanel painel, JLabel label,
+                                JComponent campo, int coluna, int linha) {
+        GridBagConstraints gbcLabel = new GridBagConstraints();
+        gbcLabel.gridx = coluna * 2;
+        gbcLabel.gridy = linha;
+        gbcLabel.anchor = GridBagConstraints.WEST;
+        gbcLabel.insets = new Insets(5, 8, 5, 10);
+        painel.add(label, gbcLabel);
+
+        GridBagConstraints gbcCampo = new GridBagConstraints();
+        gbcCampo.gridx = coluna * 2 + 1;
+        gbcCampo.gridy = linha;
+        gbcCampo.weightx = 1;
+        gbcCampo.fill = GridBagConstraints.HORIZONTAL;
+        gbcCampo.insets = new Insets(5, 0, 5, 16);
+        painel.add(campo, gbcCampo);
     }
 
     private void criarEventos() {
@@ -128,22 +264,20 @@ public class Agendamento extends JFrame {
                 txtCodigo.setText(modelo.getValueAt(linha, 0).toString());
                 txtData.setText(modelo.getValueAt(linha, 1).toString());
                 txtHorario.setText(modelo.getValueAt(linha, 2).toString());
-                txtServico.setText(modelo.getValueAt(linha, 3).toString());
+                cbServico.setSelectedItem(modelo.getValueAt(linha, 3).toString());
             }
         });
     }
 
-    // Os códigos são informados manualmente; não usamos AUTO_INCREMENT.
     private void agendar() {
-        if (!validarCampos(true)) {
-            return;
-        }
+        if (!validarCampos(true)) return;
 
         try (Connection conexao = Conexao.conectar();
-             CallableStatement comando = conexao.prepareCall("{CALL proc_ins_agendamento(?, ?, ?, ?)}")) {
+             CallableStatement comando = conexao.prepareCall(
+                     "{CALL proc_ins_agendamento(?, ?, ?, ?)}")) {
 
             comando.setInt(1, lerCodigo());
-            comando.setString(2, txtServico.getText().trim());
+            comando.setString(2, cbServico.getSelectedItem().toString());
             comando.setDate(3, converterData(txtData.getText()));
             comando.setTime(4, converterHorario(txtHorario.getText()));
             comando.execute();
@@ -155,7 +289,7 @@ public class Agendamento extends JFrame {
         } catch (NumberFormatException erro) {
             mostrarErro("O código deve ser um número inteiro positivo.");
         } catch (DateTimeParseException erro) {
-            mostrarErro("Data ou horário inválido. Para a data, dia/mês/ano e para horário, horas:minutos, nessa ordem.");
+            mostrarErro("Data ou horário inválido. Use dd/MM/aaaa e HH:mm.");
         } catch (SQLException erro) {
             mostrarErro("Erro ao agendar: " + erro.getMessage());
         }
@@ -165,14 +299,17 @@ public class Agendamento extends JFrame {
         modelo.setRowCount(0);
 
         try (Connection conexao = Conexao.conectar();
-             CallableStatement comando = conexao.prepareCall("{CALL proc_selc_agendamentos()}");
+             CallableStatement comando = conexao.prepareCall(
+                     "{CALL proc_selc_agendamentos()}");
              ResultSet resultado = comando.executeQuery()) {
 
             while (resultado.next()) {
                 modelo.addRow(new Object[]{
                         resultado.getInt("cod_agendamento"),
-                        resultado.getDate("data_agendamento").toLocalDate().format(FORMATO_DATA),
-                        resultado.getTime("horario").toLocalTime().format(FORMATO_HORARIO),
+                        resultado.getDate("data_agendamento")
+                                .toLocalDate().format(FORMATO_DATA),
+                        resultado.getTime("horario")
+                                .toLocalTime().format(FORMATO_HORARIO),
                         resultado.getString("servico")
                 });
             }
@@ -184,27 +321,26 @@ public class Agendamento extends JFrame {
     }
 
     private void atualizar() {
-        if (!validarCampos(true)) {
-            return;
-        }
+        if (!validarCampos(true)) return;
 
         try (Connection conexao = Conexao.conectar();
-             CallableStatement comando = conexao.prepareCall("{CALL proc_upd_agendamento(?, ?, ?, ?)}")) {
+             CallableStatement comando = conexao.prepareCall(
+                     "{CALL proc_upd_agendamento(?, ?, ?, ?)}")) {
 
             comando.setInt(1, lerCodigo());
-            comando.setString(2, txtServico.getText().trim());
+            comando.setString(2, cbServico.getSelectedItem().toString());
             comando.setDate(3, converterData(txtData.getText()));
             comando.setTime(4, converterHorario(txtHorario.getText()));
             comando.execute();
 
-            JOptionPane.showMessageDialog(this, "As informações de agendamento foram atualizadas.");
+            JOptionPane.showMessageDialog(this, "Agendamento atualizado.");
             limparCampos();
             consultarAgendamentos();
 
         } catch (NumberFormatException erro) {
             mostrarErro("O código deve ser um número inteiro positivo.");
         } catch (DateTimeParseException erro) {
-            mostrarErro("Data ou horário inválido. Para a data, dia/mês/ano e para horário, horas:minutos, nessa ordem.");
+            mostrarErro("Data ou horário inválido. Use dd/MM/aaaa e HH:mm.");
         } catch (SQLException erro) {
             mostrarErro("Erro ao atualizar: " + erro.getMessage());
         }
@@ -218,6 +354,7 @@ public class Agendamento extends JFrame {
 
         try {
             int codigo = lerCodigo();
+
             int resposta = JOptionPane.showConfirmDialog(
                     this,
                     "Deseja realmente excluir o agendamento " + codigo + "?",
@@ -225,17 +362,16 @@ public class Agendamento extends JFrame {
                     JOptionPane.YES_NO_OPTION
             );
 
-            if (resposta != JOptionPane.YES_OPTION) {
-                return;
-            }
+            if (resposta != JOptionPane.YES_OPTION) return;
 
             try (Connection conexao = Conexao.conectar();
-                 CallableStatement comando = conexao.prepareCall("{CALL proc_del_agendamento(?)}")) {
+                 CallableStatement comando = conexao.prepareCall(
+                         "{CALL proc_del_agendamento(?)}")) {
                 comando.setInt(1, codigo);
                 comando.execute();
             }
 
-            JOptionPane.showMessageDialog(this, "As informações foram apagadas.");
+            JOptionPane.showMessageDialog(this, "Agendamento excluído.");
             limparCampos();
             consultarAgendamentos();
 
@@ -251,12 +387,12 @@ public class Agendamento extends JFrame {
             try {
                 lerCodigo();
             } catch (NumberFormatException erro) {
-                mostrarErro("Informe um código numérico inteiro maior que zero.");
+                mostrarErro("Informe um código inteiro maior que zero.");
                 return false;
             }
         }
 
-        if (txtServico.getText().trim().isEmpty()
+        if (cbServico.getSelectedItem() == null
                 || txtData.getText().trim().isEmpty()
                 || txtHorario.getText().trim().isEmpty()) {
             mostrarErro("Preencha o serviço, a data e o horário.");
@@ -267,9 +403,10 @@ public class Agendamento extends JFrame {
             converterData(txtData.getText());
             converterHorario(txtHorario.getText());
         } catch (DateTimeParseException erro) {
-            mostrarErro("Data ou horário inválido. Use data dia/mês/ano e horário HH:mm.");
+            mostrarErro("Use a data dd/MM/aaaa e o horário HH:mm.");
             return false;
         }
+
         return true;
     }
 
@@ -282,25 +419,31 @@ public class Agendamento extends JFrame {
     }
 
     private java.sql.Date converterData(String data) {
-        LocalDate dataConvertida = LocalDate.parse(data.trim(), FORMATO_DATA);
+        LocalDate dataConvertida = LocalDate.parse(
+                data.trim(), FORMATO_DATA
+        );
         return java.sql.Date.valueOf(dataConvertida);
     }
 
     private java.sql.Time converterHorario(String horario) {
-        LocalTime horarioConvertido = LocalTime.parse(horario.trim(), FORMATO_HORARIO);
+        LocalTime horarioConvertido = LocalTime.parse(
+                horario.trim(), FORMATO_HORARIO
+        );
         return java.sql.Time.valueOf(horarioConvertido);
     }
 
     private void limparCampos() {
         txtCodigo.setText("");
-        txtServico.setText("");
-        txtHorario.setText("");
         txtData.setText("");
+        txtHorario.setText("");
+        cbServico.setSelectedIndex(0);
         tabela.clearSelection();
         txtCodigo.requestFocusInWindow();
     }
 
     private void mostrarErro(String mensagem) {
-        JOptionPane.showMessageDialog(this, mensagem, "Atenção", JOptionPane.WARNING_MESSAGE);
+        JOptionPane.showMessageDialog(
+                this, mensagem, "Atenção", JOptionPane.WARNING_MESSAGE
+        );
     }
 }
