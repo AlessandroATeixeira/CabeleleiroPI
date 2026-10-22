@@ -4,7 +4,6 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -48,7 +47,7 @@ public class MainScreen extends JFrame {
        );
 
         JLabel lblTitulo = new JLabel(
-                "Gerenciamento Cabeleleiro",
+                "Gerenciamento Cabeleireiro",
                 SwingConstants.CENTER
         );
         lblTitulo.setFont(new Font("Arial", Font.BOLD, 28));
@@ -65,7 +64,7 @@ public class MainScreen extends JFrame {
         btnCaixa = criarBotao("Caixa");
         btnRelatorios = criarBotao("Relatórios");
         btnSair = criarBotaoSair("Sair");
-        btnAgendamento = criarBotaoSair("Agendamento");
+        btnAgendamento = criarBotao("Agendamento");
 
         painelBotoes.add(btnClientes);
         painelBotoes.add(btnProdutos);
@@ -104,7 +103,7 @@ public class MainScreen extends JFrame {
         return botao;
     }
 
-    private JButton criarBotaAgendamento(String texto) {
+    private JButton criarBotaoAgendamento(String texto) {
         JButton botao = new JButton(texto);
         botao.setFont(new Font("Arial", Font.BOLD, 14));
         botao.setFocusPainted(false);
@@ -120,7 +119,7 @@ public class MainScreen extends JFrame {
         btnClientes.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                abrirTela(new Screen());
+                abrirTela(new ClientScreen());
             }
         });
 
@@ -148,7 +147,7 @@ public class MainScreen extends JFrame {
         btnAgendamento.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                abrirTela(new Agendamento());
+                new Agendamento();
             }
         });
 

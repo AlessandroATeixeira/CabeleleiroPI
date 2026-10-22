@@ -374,13 +374,13 @@ public class CashReportScreen extends JFrame {
             g.fillRect(20, 20, 15, 15);
 
             g.setColor(Color.DARK_GRAY);
-            g.drawString("Entradas", 40, 33);
+            g.drawString("Entradas", 40, 20);
 
             g.setColor(new Color(210, 60, 60));
             g.fillRect(120, 20, 15, 15);
 
             g.setColor(Color.DARK_GRAY);
-            g.drawString("Saídas", 140, 33);
+            g.drawString("Saídas", 140, 20);
 
             g.setColor(Color.BLACK);
             g.setStroke(new BasicStroke(2));
