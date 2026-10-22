@@ -33,6 +33,8 @@ public class MainScreen extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout(20, 20));
 
+        getContentPane().setBackground(new Color(41, 35, 31));
+
         criarComponentes();
         criarEventos();
 
@@ -43,14 +45,14 @@ public class MainScreen extends JFrame {
         JPanel painelPrincipal = new JPanel(new BorderLayout(20, 20));
         painelPrincipal.setBorder(
                 BorderFactory.createEmptyBorder(25, 30, 20, 30)
-        );
+       );
 
         JLabel lblTitulo = new JLabel(
                 "Gerenciamento Cabeleleiro",
                 SwingConstants.CENTER
         );
         lblTitulo.setFont(new Font("Arial", Font.BOLD, 28));
-        lblTitulo.setForeground(new Color(39, 83, 130));
+        lblTitulo.setForeground(new Color(214, 179, 106));
         painelPrincipal.add(lblTitulo, BorderLayout.NORTH);
 
         JPanel painelBotoes = new JPanel(new GridLayout(5, 1, 15, 20));
@@ -85,7 +87,7 @@ public class MainScreen extends JFrame {
         JButton botao = new JButton(texto);
         botao.setFont(new Font("Arial", Font.BOLD, 18));
         botao.setFocusPainted(false);
-        botao.setBackground(new Color(53, 105, 168));
+        botao.setBackground(new Color(246, 230, 162));
         botao.setForeground(Color.WHITE);
         botao.setPreferredSize(new Dimension(250, 55));
 
@@ -96,7 +98,7 @@ public class MainScreen extends JFrame {
         JButton botao = new JButton(texto);
         botao.setFont(new Font("Arial", Font.BOLD, 14));
         botao.setFocusPainted(false);
-        botao.setBackground(new Color(185, 47, 47));
+        botao.setBackground(new Color(246, 230, 162));
         botao.setForeground(Color.WHITE);
         botao.setPreferredSize(new Dimension(120, 40));
         return botao;
@@ -106,7 +108,7 @@ public class MainScreen extends JFrame {
         JButton botao = new JButton(texto);
         botao.setFont(new Font("Arial", Font.BOLD, 14));
         botao.setFocusPainted(false);
-        botao.setBackground(new Color(185, 47, 47));
+        botao.setBackground(new Color(246, 230, 162));
         botao.setForeground(Color.WHITE);
         botao.setPreferredSize(new Dimension(120, 40));
         return botao;
