@@ -73,7 +73,7 @@ public class ProductScreen extends JFrame {
         add(txtCodigo);
 
         // Nome
-        lblNome = new JLabel("Nome:");
+        lblNome = new JLabel("Produto:");
         lblNome.setBounds(30, 80, 80, 25);
         add(lblNome);
 
@@ -515,3 +515,4 @@ public class ProductScreen extends JFrame {
         txtCodigo.requestFocus();
     }
 }
+
