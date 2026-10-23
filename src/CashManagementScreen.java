@@ -1,8 +1,4 @@
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
+import java.awt.*;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -16,9 +12,15 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.DefaultTableModel;
+
+
 public class CashManagementScreen extends JFrame {
 
     private JComboBox<String> comboTipo;
+    private JComboBox<String> cbServProd;
+
     private JTextField txtValor;
     private JTextField txtDescricao;
 
@@ -26,11 +28,13 @@ public class CashManagementScreen extends JFrame {
     private JTable tabela;
     private DefaultTableModel modelo;
 
+    private JButton Registrar;
+
     private double saldo = 0.0;
 
     public CashManagementScreen() {
         setTitle("Gerenciamento de Caixa");
-        setSize(750, 500);
+        setSize(750, 650);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout(10, 10));
@@ -49,6 +53,11 @@ public class CashManagementScreen extends JFrame {
                 new String[] {"ENTRADA", "SAÍDA"}
         );
 
+        cbServProd = new JComboBox<>(
+                new String[]{ "Produto","Serviço"
+                }
+        );
+
         txtValor = new JTextField();
         txtDescricao = new JTextField();
 
@@ -57,14 +66,14 @@ public class CashManagementScreen extends JFrame {
         painelFormulario.add(new JLabel("Tipo:"));
         painelFormulario.add(comboTipo);
 
-        painelFormulario.add(new JLabel("Valor:"));
-        painelFormulario.add(txtValor);
+        painelFormulario.add(new JLabel("Produto:"));
+        painelFormulario.add(cbServProd);
 
         painelFormulario.add(new JLabel("Descrição:"));
         painelFormulario.add(txtDescricao);
 
-        painelFormulario.add(new JLabel(""));
-        painelFormulario.add(btnRegistrar);
+        painelFormulario.add(new JLabel("Valor:"));
+        painelFormulario.add(txtValor);
 
         add(painelFormulario, BorderLayout.NORTH);
 
@@ -72,13 +81,22 @@ public class CashManagementScreen extends JFrame {
                 new Object[] {
                         "Data/Hora",
                         "Tipo",
-                        "Valor",
-                        "Descrição"
+                        "Produto",
+                        "Descrição",
+                        "Valor"
                 },
                 0
         );
 
+        JPanel botoes = new JPanel(new FlowLayout(FlowLayout.LEFT, 9, 0));
+        botoes.setOpaque(false);
+
+        Registrar = new JButton("Registrar");
+        Registrar.setBounds(30, 160, 105, 30);
+        add(Registrar);
+
         tabela = new JTable(modelo);
+        tabela.setRowHeight(30);
         add(new JScrollPane(tabela), BorderLayout.CENTER);
 
         lblSaldo = new JLabel("Saldo atual: R$ 0,00");
