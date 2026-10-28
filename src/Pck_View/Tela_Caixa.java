@@ -1,3 +1,5 @@
+package Pck_View;
+
 import java.awt.*;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -12,11 +14,8 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.DefaultTableModel;
 
-
-public class CashManagementScreen extends JFrame {
+public class Tela_Caixa extends JFrame {
 
     private JComboBox<String> comboTipo;
     private JComboBox<String> cbServProd;
@@ -32,7 +31,7 @@ public class CashManagementScreen extends JFrame {
 
     private double saldo = 0.0;
 
-    public CashManagementScreen() {
+    public Tela_Caixa() {
         setTitle("Gerenciamento de Caixa");
         setSize(750, 650);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -169,21 +168,6 @@ public class CashManagementScreen extends JFrame {
                     "Movimentação registrada com sucesso."
             );
 
-            /*
-             * In a real application, save the movement in the database here.
-             *
-             * Example:
-             *
-             * Connection conexao = Conexao.conectar();
-             * CallableStatement comando = conexao.prepareCall(
-             *     "{CALL PROC_INS_MOVIMENTO_CAIXA(?, ?, ?)}"
-             * );
-             *
-             * comando.setString(1, tipo);
-             * comando.setDouble(2, valor);
-             * comando.setString(3, descricao);
-             * comando.executeUpdate();
-             */
 
         } catch (NumberFormatException erro) {
             JOptionPane.showMessageDialog(

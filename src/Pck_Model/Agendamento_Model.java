@@ -1,3 +1,7 @@
+package Pck_Model;
+
+import Pck_DAO.Conexao;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -21,7 +25,7 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
-public class Agendamento extends JFrame {
+public class Agendamento_Model extends JFrame {
 
     private JLabel lblCodigo;
     private JLabel lblServico;
@@ -52,7 +56,7 @@ public class Agendamento extends JFrame {
     private static final DateTimeFormatter FORMATO_HORARIO =
             DateTimeFormatter.ofPattern("HH:mm");
 
-    public Agendamento() {
+    public Agendamento_Model() {
         setTitle("Sistema de Agendamento");
         setSize(900, 700);
         setMinimumSize(new Dimension(780, 620));

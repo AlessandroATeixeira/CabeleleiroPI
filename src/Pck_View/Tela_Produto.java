@@ -1,3 +1,7 @@
+package Pck_View;
+
+import Pck_DAO.Conexao;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.CallableStatement;
@@ -15,7 +19,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 
-public class ProductScreen extends JFrame {
+public class Tela_Produto extends JFrame {
 
     private JLabel lblCodigo;
     private JLabel lblNome;
@@ -37,7 +41,7 @@ public class ProductScreen extends JFrame {
     private DefaultTableModel modelo;
     private JScrollPane barraRolagem;
 
-    public ProductScreen() {
+    public Tela_Produto() {
 
         setTitle("Cadastro de Produtos");
         setSize(650, 530);

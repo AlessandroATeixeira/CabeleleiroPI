@@ -1,3 +1,7 @@
+package Pck_View;
+
+import Pck_DAO.Conexao;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.CallableStatement;
@@ -16,7 +20,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 
-public class ClientScreen extends JFrame {
+public class Tela_Cliente extends JFrame {
 
     private JLabel lblTitulo;
     private JLabel lblCodigo;
@@ -37,7 +41,7 @@ public class ClientScreen extends JFrame {
     private DefaultTableModel modelo;
     private JScrollPane barraRolagem;
 
-    public ClientScreen() {
+    public Tela_Cliente() {
 
         setTitle("Cadastro de Clientes");
         setSize(700, 550);
@@ -195,7 +199,7 @@ public class ClientScreen extends JFrame {
         });
     }
 
-    // INSERIR CLIENTE
+
     private void inserirCliente() {
 
         int codigo;
@@ -271,7 +275,7 @@ public class ClientScreen extends JFrame {
         }
     }
 
-    // CONSULTAR CLIENTES
+
     private void consultarClientes() {
 
         try (
@@ -305,7 +309,7 @@ public class ClientScreen extends JFrame {
         }
     }
 
-    // ALTERAR CLIENTE
+
     private void alterarCliente() {
 
         int codigo;
@@ -381,7 +385,6 @@ public class ClientScreen extends JFrame {
         }
     }
 
-    // EXCLUIR CLIENTE
     private void excluirCliente() {
 
         int codigo;
@@ -447,7 +450,6 @@ public class ClientScreen extends JFrame {
         }
     }
 
-    // VALIDAR TELEFONE
     private boolean validarTelefone(String telefone) {
 
         String somenteNumeros = telefone.replaceAll("\\D", "");
@@ -455,7 +457,7 @@ public class ClientScreen extends JFrame {
         return somenteNumeros.matches("\\d{11}");
     }
 
-    // LIMPAR CAMPOS
+
     private void limparCampos() {
 
         txtCodigo.setText("");

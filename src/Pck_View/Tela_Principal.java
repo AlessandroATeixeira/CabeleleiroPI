@@ -1,3 +1,7 @@
+package Pck_View;
+
+import Pck_Model.Agendamento_Model;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -16,7 +20,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
-public class MainScreen extends JFrame {
+public class Tela_Principal extends JFrame {
 
     private JButton btnClientes;
     private JButton btnProdutos;
@@ -25,7 +29,7 @@ public class MainScreen extends JFrame {
     private JButton btnSair;
     private  JButton btnAgendamento;
 
-    public MainScreen() {
+    public Tela_Principal() {
         setTitle("Sistema do Cabeleireiro");
         setSize(600, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -51,7 +55,7 @@ public class MainScreen extends JFrame {
                 SwingConstants.CENTER
         );
         lblTitulo.setFont(new Font("Arial", Font.BOLD, 28));
-        lblTitulo.setForeground(new Color(214, 179, 106));
+        lblTitulo.setForeground(new Color(165, 126, 44));
         painelPrincipal.add(lblTitulo, BorderLayout.NORTH);
 
         JPanel painelBotoes = new JPanel(new GridLayout(5, 1, 15, 20));
@@ -119,35 +123,35 @@ public class MainScreen extends JFrame {
         btnClientes.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                abrirTela(new ClientScreen());
+                abrirTela(new Tela_Cliente());
             }
         });
 
         btnProdutos.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                abrirTela(new ProductScreen());
+                abrirTela(new Tela_Produto());
             }
         });
 
         btnCaixa.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                abrirTela(new CashManagementScreen());
+                abrirTela(new Tela_Caixa());
             }
         });
 
         btnRelatorios.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                abrirTela(new CashReportScreen());
+                abrirTela(new Tela_Relatorio_Caixa());
             }
         });
 
         btnAgendamento.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new Agendamento();
+                new Agendamento_Model();
             }
         });
 
@@ -155,7 +159,7 @@ public class MainScreen extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 int opcao = JOptionPane.showConfirmDialog(
-                        MainScreen.this,
+                        Tela_Principal.this,
                         "Deseja realmente sair?",
                         "Confirmar saída",
                         JOptionPane.YES_NO_OPTION
@@ -177,7 +181,7 @@ public class MainScreen extends JFrame {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                new MainScreen();
+                new Tela_Principal();
             }
         });
     }

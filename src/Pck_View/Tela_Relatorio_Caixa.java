@@ -1,3 +1,5 @@
+package Pck_View;
+
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -17,10 +19,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 
-public class CashReportScreen extends JFrame {
+public class Tela_Relatorio_Caixa extends JFrame {
 
     private JComboBox<String> comboPeriodo;
     private JLabel lblTotalEntradas;
@@ -30,7 +31,7 @@ public class CashReportScreen extends JFrame {
     private DefaultTableModel modelo;
     private ChartPanel grafico;
 
-    public CashReportScreen() {
+    public Tela_Relatorio_Caixa() {
         setTitle("Relatórios de Caixa");
         setSize(900, 650);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -134,12 +135,6 @@ public class CashReportScreen extends JFrame {
         String periodoSelecionado =
                 comboPeriodo.getSelectedItem().toString();
 
-        /*
-         * Estes valores são exemplos.
-         *
-         * Posteriormente, substitua este método por uma consulta ao banco
-         * de dados usando os registros reais da tabela de caixa.
-         */
         List<ResumoPeriodo> dados = gerarDadosExemplo(
                 periodoSelecionado
         );
