@@ -267,6 +267,7 @@ public class Screen_Scheduling extends JFrame {
         btnAtualizar.addActionListener(e -> atualizar());
         btnExcluir.addActionListener(e -> excluir());
         btnLimpar.addActionListener(e -> limparCampos());
+        tabela.getSelectionModel().addListSelectionListener(e -> selecionarLinha());
 
         tabela.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting() && tabela.getSelectedRow() != -1) {
@@ -293,7 +294,10 @@ public class Screen_Scheduling extends JFrame {
             modelo.setRowCount(0);
             ArrayList<Model_Scheduling> lista=control.Consultar();
             for(Model_Scheduling c:lista){
-                modelo.addRow(new Object[]{c.getCodigo(),c.getServico(), c.getData(), c.getHorario()});
+                modelo.addRow(new Object[]{ c.getCodigo(),
+                                            LocalDate.parse(c.getData()).format(FORMATO_DATA),
+                                            LocalTime.parse(c.getHorario()).format(FORMATO_HORARIO),
+                                            c.getServico()});
             }
         }catch(Exception e){
             JOptionPane.showMessageDialog(this,e.getMessage());
@@ -338,9 +342,4 @@ public class Screen_Scheduling extends JFrame {
         txtCodigo.requestFocusInWindow();
     }
 
-    private void mostrarErro(String mensagem) {
-        JOptionPane.showMessageDialog(
-                this, mensagem, "Atenção", JOptionPane.WARNING_MESSAGE
-        );
-    }
 }

@@ -21,6 +21,8 @@ public class Persistence_Scheduling {
                 oCall.setString(2, Model_Scheduling.getServico());
                 oCall.setDate(3, Date.valueOf(Model_Scheduling.getData()));
                 oCall.setTime(4, Time.valueOf(Model_Scheduling.getHorario()));
+                oCall.execute();
+                oCall.close();
 
             }catch (SQLException e) {e.printStackTrace();}
         }finally { oConectar.desconectar();}
@@ -34,6 +36,8 @@ public class Persistence_Scheduling {
                 oCall.setString(2, Model_Scheduling.getServico());
                 oCall.setDate(3, Date.valueOf(Model_Scheduling.getData()));
                 oCall.setTime(4, Time.valueOf(Model_Scheduling.getHorario()));
+                oCall.execute();
+                oCall.close();
 
             }catch (SQLException e) {e.printStackTrace();}
         }finally { oConectar.desconectar();}
@@ -52,7 +56,7 @@ public class Persistence_Scheduling {
 
     public ArrayList<Model_Scheduling> listScheduling() throws SQLException {
         ArrayList<Model_Scheduling> lista=new ArrayList<>();
-        oCall=oConectar.getConexao(login,senha).prepareCall("{CALL proc_selc_clientes()}");
+        oCall=oConectar.getConexao(login,senha).prepareCall("{CALL proc_selc_agendamentos()}");
         oResultSet=oCall.executeQuery();
         while(oResultSet.next()){
             Model_Scheduling objScheduling = new Model_Scheduling();
