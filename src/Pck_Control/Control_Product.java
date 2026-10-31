@@ -24,7 +24,7 @@ public class Control_Product {
         objProduct.setNome(nome);
         objProduct.setValorProd(Double.parseDouble(valorProd));
         objProduct.setEstoque(Integer.parseInt(estoque));
-        oPers.PersInsProduct(objProduct);
+        oPers.PersUpdProduct(objProduct);
     }
 
     public void Excluir(String codigo) throws Exception{

@@ -25,7 +25,7 @@ public class Control_Scheduling {
         objScheduling.setServico(servico);
         objScheduling.setData(data);
         objScheduling.setHorario(hora);
-        oPers.PersInsScheduling(objScheduling);
+        oPers.PersUpdScheduling(objScheduling);
     }
 
     public void Excluir(String codigo) throws Exception{

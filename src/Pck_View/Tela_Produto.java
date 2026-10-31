@@ -20,7 +20,6 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 
-import Pck_Model.Model_Client;
 import Pck_Model.Model_Product;
 import Pck_Control.Control_Product;
 
@@ -185,7 +184,7 @@ public class Tela_Produto extends JFrame {
 
     private void alterarProduto() {
         try {
-            control.Inserir(txtCodigo.getText(), txtNome.getText(), txtValorProd.getText(), txtEstoque.getText());
+            control.Atualizar(txtCodigo.getText(), txtNome.getText(), txtValorProd.getText(), txtEstoque.getText());
             JOptionPane.showMessageDialog(this,"Produto salvo com sucesso");
             carregarTabela();
         }catch(Exception e) {
