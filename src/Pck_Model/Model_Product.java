@@ -8,13 +8,6 @@ public class Model_Product {
     private int estoque;
 
 
-    public Model_Product(int codigo, String nome, double valorProd, int estoque) {
-        this.codigo = codigo;
-        this.nome = nome;
-        this.valorProd = valorProd;
-        this.estoque = estoque;
-    }
-
     public int getCodigo() {
         return codigo;
     }

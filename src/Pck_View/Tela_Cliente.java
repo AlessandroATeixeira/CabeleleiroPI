@@ -24,7 +24,7 @@ import javax.swing.table.DefaultTableModel;
 
 import Pck_Model.Model_Client;
 import Pck_Control.Control_Client;
-import Pck_Model.Model_Scheduling;
+
 
 public class Tela_Cliente extends JFrame {
 
@@ -185,7 +185,6 @@ public class Tela_Cliente extends JFrame {
         }catch(Exception e) {
             JOptionPane.showMessageDialog(this,e.getMessage());
         }
-
     }
 
     private void carregarTabela(){
@@ -198,8 +197,6 @@ public class Tela_Cliente extends JFrame {
         }catch(Exception e){
             JOptionPane.showMessageDialog(this,e.getMessage());
         }
-
-
     }
 
 }

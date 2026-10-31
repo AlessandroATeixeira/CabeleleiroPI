@@ -56,10 +56,10 @@ public class Persistence_Scheduling {
         oResultSet=oCall.executeQuery();
         while(oResultSet.next()){
             Model_Scheduling objScheduling = new Model_Scheduling();
-            objScheduling.setCodigo(oResultSet.getInt("codigo"));
+            objScheduling.setCodigo(oResultSet.getInt("cod_agendamento"));
             objScheduling.setServico(oResultSet.getString("servico"));
-            objScheduling.setData(oResultSet.getString("data"));
-            objScheduling.setHorario(oResultSet.getString("hora"));
+            objScheduling.setData(oResultSet.getString("data_agendamento"));
+            objScheduling.setHorario(oResultSet.getString("horario"));
             lista.add(objScheduling);
         }
         oResultSet.close();

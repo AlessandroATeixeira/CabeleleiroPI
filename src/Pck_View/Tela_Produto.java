@@ -8,6 +8,7 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -18,6 +19,11 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
+
+import Pck_Model.Model_Client;
+import Pck_Model.Model_Product;
+import Pck_Control.Control_Product;
+
 
 public class Tela_Produto extends JFrame {
 
@@ -41,6 +47,8 @@ public class Tela_Produto extends JFrame {
     private DefaultTableModel modelo;
     private JScrollPane barraRolagem;
 
+    Control_Product control = new Control_Product();
+
     public Tela_Produto() {
 
         setTitle("Cadastro de Produtos");
@@ -53,9 +61,7 @@ public class Tela_Produto extends JFrame {
         criarEventos();
 
         setVisible(true);
-
-        // Carrega os produtos ao abrir a tela.
-        consultarProdutos();
+        carregarTabela();
     }
 
     private void criarComponentes() {
@@ -149,374 +155,67 @@ public class Tela_Produto extends JFrame {
 
     private void criarEventos() {
 
-        // INSERIR
-        btnInserir.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent evento) {
-                inserirProduto();
-            }
-        });
+        btnAlterar.addActionListener(e -> alterarProduto());
+        btnInserir.addActionListener(e -> inserirProduto());
+        btnRemover.addActionListener(e -> excluirProduto());
+        tabela.getSelectionModel().addListSelectionListener(e -> selecionarLinha());
 
-        // CONSULTAR
-        btnConsultar.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent evento) {
-                consultarProdutos();
-            }
-        });
-
-        // ALTERAR
-        btnAlterar.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent evento) {
-                alterarProduto();
-            }
-        });
-
-        // EXCLUIR
-        btnRemover.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent evento) {
-                excluirProduto();
-            }
-        });
-
-        // LIMPAR CAMPOS
-        btnLimpar.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent evento) {
-                limparCampos();
-            }
-        });
-
-        // Preenche os campos ao selecionar uma linha da tabela.
-        tabela.getSelectionModel().addListSelectionListener(evento -> {
-
-            if (!evento.getValueIsAdjusting()
-                    && tabela.getSelectedRow() != -1) {
-
-                int linha = tabela.getSelectedRow();
-
-                txtCodigo.setText(
-                        modelo.getValueAt(linha, 0).toString()
-                );
-
-                txtNome.setText(
-                        modelo.getValueAt(linha, 1).toString()
-                );
-
-                txtValorProd.setText(
-                        modelo.getValueAt(linha, 2).toString()
-                );
-
-                txtEstoque.setText(
-                        modelo.getValueAt(linha, 3).toString()
-                );
-            }
-        });
     }
 
-    // MÉTODO PARA INSERIR PRODUTO
+    private void selecionarLinha(){
+        int linha=tabela.getSelectedRow();
+        if(linha>=0){
+            txtCodigo.setText(modelo.getValueAt(linha,0).toString());
+            txtNome.setText(modelo.getValueAt(linha,1).toString());
+            txtValorProd.setText(modelo.getValueAt(linha,2).toString());
+            txtEstoque.setText(modelo.getValueAt(linha, 3).toString());
+        }
+    }
+
+
     private void inserirProduto() {
-
-        String nome = txtNome.getText().trim();
-
-        if (txtCodigo.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Informe o código do produto."
-            );
-            return;
-        }
-
-        if (nome.isEmpty()) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Informe o nome do produto."
-            );
-            return;
-        }
-
         try {
-            int codigo = Integer.parseInt(txtCodigo.getText().trim());
-
-            if (codigo <= 0) {
-                JOptionPane.showMessageDialog(
-                        this,
-                        "O código deve ser maior que zero, senão não cadastra."
-                );
-                return;
-            }
-
-            double valor = lerValor();
-            int estoque = lerEstoque();
-
-            try (
-                    Connection conexao = Conexao.conectar();
-                    CallableStatement comando =
-                            conexao.prepareCall(
-                                    "{CALL proc_ins_produto(?, ?, ?, ?)}"
-                            )
-            ) {
-                comando.setInt(1, codigo);
-                comando.setString(2, nome);
-                comando.setDouble(3, valor);
-                comando.setInt(4, estoque);
-
-                comando.execute();
-
-                JOptionPane.showMessageDialog(
-                        this,
-                        "O produto foi cadastrado."
-                );
-            }
-
-            limparCampos();
-            consultarProdutos();
-
-        } catch (NumberFormatException erro) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Confira o código, o valor e o estoque. "
-                            + "O código deve ser inteiro, o valor numérico "
-                            + "e o estoque um inteiro não negativo."
-            );
-
-        } catch (SQLException erro) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Erro ao cadastrar produto: " + erro.getMessage()
-            );
+            control.Inserir(txtCodigo.getText(), txtNome.getText(), txtValorProd.getText(), txtEstoque.getText());
+            JOptionPane.showMessageDialog(this,"Produto salvo com sucesso");
+            carregarTabela();
+        }catch(Exception e) {
+            JOptionPane.showMessageDialog(this,e.getMessage());
         }
     }
 
-    // MÉTODO PARA CONSULTAR PRODUTOS
-    private void consultarProdutos() {
-
-        try (
-                Connection conexao = Conexao.conectar();
-                CallableStatement comando =
-                        conexao.prepareCall(
-                                "{CALL proc_selc_produtos()}"
-                        );
-                ResultSet resultado = comando.executeQuery()
-        ) {
-
-            modelo.setRowCount(0);
-
-            while (resultado.next()) {
-
-                int codigo = resultado.getInt("cod_produto");
-                String nome = resultado.getString("nome_prod");
-                double valor = resultado.getDouble("valor_prod");
-                int estoque = resultado.getInt("estoque");
-
-                modelo.addRow(new Object[] {
-                        codigo,
-                        nome,
-                        valor,
-                        estoque
-                });
-            }
-
-        } catch (SQLException erro) {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Erro ao consultar produtos: " + erro.getMessage()
-            );
-        }
-    }
-
-    // MÉTODO PARA ALTERAR PRODUTO
     private void alterarProduto() {
-
-        String nome = txtNome.getText().trim();
-
-        if (txtCodigo.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Informe o código ou selecione um produto na tabela."
-            );
-            return;
-        }
-
-        if (nome.isEmpty()) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Informe o nome do produto."
-            );
-            return;
-        }
-
         try {
-
-            int codigo = Integer.parseInt(
-                    txtCodigo.getText().trim()
-            );
-
-            if (codigo <= 0) {
-                JOptionPane.showMessageDialog(
-                        this,
-                        "O código deve ser maior que zero."
-                );
-                return;
-            }
-
-            double valor = lerValor();
-            int estoque = lerEstoque();
-
-            try (
-                    Connection conexao = Conexao.conectar();
-                    CallableStatement comando =
-                            conexao.prepareCall(
-                                    "{CALL proc_upd_produto(?, ?, ?, ?)}"
-                            )
-            ) {
-
-                comando.setInt(1, codigo);
-                comando.setString(2, nome);
-                comando.setDouble(3, valor);
-                comando.setInt(4, estoque);
-
-                comando.execute();
-
-                JOptionPane.showMessageDialog(
-                        this,
-                        "As informações foram atualizadas. "
-                                + "Confira a tabela para verificar o resultado."
-                );
-            }
-
-            limparCampos();
-            consultarProdutos();
-
-        } catch (NumberFormatException erro) {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Código e estoque devem ser inteiros, e não pode colocar texto. "
-                            + "O valor deve ser numérico."
-            );
-
-        } catch (SQLException erro) {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Erro ao alterar produto: " + erro.getMessage()
-            );
+            control.Inserir(txtCodigo.getText(), txtNome.getText(), txtValorProd.getText(), txtEstoque.getText());
+            JOptionPane.showMessageDialog(this,"Produto salvo com sucesso");
+            carregarTabela();
+        }catch(Exception e) {
+            JOptionPane.showMessageDialog(this,e.getMessage());
         }
     }
 
-    // MÉTODO PARA EXCLUIR PRODUTO
     private void excluirProduto() {
-
-        if (txtCodigo.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Informe o código ou selecione um produto na tabela."
-            );
-            return;
-        }
-
         try {
+            control.Excluir(txtCodigo.getText());
+            JOptionPane.showMessageDialog(this,"Produto Excluido com sucesso");
+            carregarTabela();
+        }catch(Exception e) {
+            JOptionPane.showMessageDialog(this,e.getMessage());
+        }
+    }
 
-            int codigo = Integer.parseInt(
-                    txtCodigo.getText().trim()
-            );
-
-            int confirmacao = JOptionPane.showConfirmDialog(
-                    this,
-                    "Deseja realmente excluir o produto "
-                            + codigo + "?",
-                    "Confirmar exclusão",
-                    JOptionPane.YES_NO_OPTION
-            );
-
-            if (confirmacao != JOptionPane.YES_OPTION) {
-                return;
+    private void carregarTabela(){
+        try{
+            modelo.setRowCount(0);
+            ArrayList<Model_Product> lista=control.Consultar();
+            for(Model_Product c:lista){
+                modelo.addRow(new Object[]{c.getCodigo(),c.getNome(), c.getValorProd(), c.getEstoque()});
             }
-
-            try (
-                    Connection conexao = Conexao.conectar();
-                    CallableStatement comando =
-                            conexao.prepareCall(
-                                    "{CALL proc_del_produto(?)}"
-                            )
-            ) {
-
-                comando.setInt(1, codigo);
-                comando.execute();
-
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Você excluiu o produto."
-                );
-            }
-
-            limparCampos();
-            consultarProdutos();
-
-        } catch (NumberFormatException erro) {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "O código deve ser um número inteiro."
-            );
-
-        } catch (SQLException erro) {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Erro ao excluir produto: " + erro.getMessage()
-            );
+        }catch(Exception e){
+            JOptionPane.showMessageDialog(this,e.getMessage());
         }
     }
 
-    // LÊ E VALIDA O VALOR DO PRODUTO
-    private double lerValor() {
 
-        String texto = txtValorProd.getText()
-                .trim()
-                .replace(",", ".");
 
-        double valor = Double.parseDouble(texto);
-
-        if (!Double.isFinite(valor) || valor < 0) {
-            throw new NumberFormatException(
-                    "O valor não pode ser negativo."
-            );
-        }
-
-        return valor;
-    }
-
-    // LÊ E VALIDA O ESTOQUE
-    private int lerEstoque() {
-
-        int estoque = Integer.parseInt(
-                txtEstoque.getText().trim()
-        );
-
-        if (estoque < 0) {
-            throw new NumberFormatException(
-                    "Não existe estoque negativo."
-            );
-        }
-
-        return estoque;
-    }
-
-    // LIMPA OS CAMPOS
-    private void limparCampos() {
-
-        txtCodigo.setText("");
-        txtNome.setText("");
-        txtValorProd.setText("");
-        txtEstoque.setText("");
-
-        tabela.clearSelection();
-        txtCodigo.requestFocus();
-    }
 }
 

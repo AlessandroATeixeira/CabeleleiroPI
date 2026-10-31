@@ -63,9 +63,9 @@ public class Persistence_Client {
         oResultSet=oCall.executeQuery();
         while(oResultSet.next()){
             Model_Client objClient = new Model_Client();
-            objClient.setCodigo(oResultSet.getInt("codigo"));
-            objClient.setNome(oResultSet.getString("nome"));
-            objClient.setTelefone(oResultSet.getString("telefone"));
+            objClient.setCodigo(oResultSet.getInt("cod_cliente"));
+            objClient.setNome(oResultSet.getString("c_nome"));
+            objClient.setTelefone(oResultSet.getString("c_telefone"));
             lista.add(objClient);
         }
         oResultSet.close();

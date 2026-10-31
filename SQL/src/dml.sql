@@ -14,16 +14,16 @@ USE bd_cabeleireiro;
 CREATE TABLE cliente (
         cod_cliente INT PRIMARY KEY,
         c_nome VARCHAR(100) NOT NULL,
-c_telefone CHAR(11) NOT NULL
+        c_telefone CHAR(11) NOT NULL
 );
 
 CREATE TABLE produto (
         cod_produto INT PRIMARY KEY,
         nome_prod VARCHAR(60) NOT NULL,
-valor_prod DECIMAL(10,2) NOT NULL,
-estoque INT NOT NULL DEFAULT 0,
-CONSTRAINT chk_produto_valor CHECK (valor_prod >= 0),
-CONSTRAINT chk_produto_estoque CHECK (estoque >= 0)
+        valor_prod DECIMAL(10,2) NOT NULL,
+        estoque INT NOT NULL DEFAULT 0,
+        CONSTRAINT chk_produto_valor CHECK (valor_prod >= 0),
+        CONSTRAINT chk_produto_estoque CHECK (estoque >= 0)
 );
 
 CREATE TABLE pedido (
@@ -51,8 +51,8 @@ FOREIGN KEY (cod_produto) REFERENCES produto(cod_produto)
 CREATE TABLE agendamento (
         cod_agendamento INT PRIMARY KEY,
         servico VARCHAR(100) NOT NULL,
-data_agendamento DATE NOT NULL,
-horario TIME NOT NULL
+        data_agendamento DATE NOT NULL,
+        horario TIME NOT NULL
 );
 
         -- =========================================================
