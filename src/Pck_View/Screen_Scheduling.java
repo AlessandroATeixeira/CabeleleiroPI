@@ -3,24 +3,36 @@ package Pck_View;
 import Pck_Control.Control_Scheduling;
 import Pck_Model.Model_Scheduling;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import java.awt.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
 public class Screen_Scheduling extends JFrame {
+
+    private static final Color COR_PRIMARIA = new Color(86, 28, 36);
+    private static final Color COR_PRIMARIA_2 = new Color(109, 41, 50);
+    private static final Color COR_SECUNDARIA = new Color(199, 183, 163);
+    private static final Color COR_FUNDO = new Color(244, 239, 234);
+    private static final Color COR_PANEL = new Color(247, 244, 241);
+    private static final Color COR_TEXT = new Color(34, 34, 34);
 
     private JLabel lblCodigo;
     private JLabel lblServico;
@@ -30,7 +42,7 @@ public class Screen_Scheduling extends JFrame {
     private JTextField txtCodigo;
     private JTextField txtHorario;
     private JTextField txtData;
-    public static JComboBox<String> cbServico;
+    private JComboBox<String> cbServico;
 
     private JButton btnAgendar;
     private JButton btnExcluir;
@@ -41,19 +53,14 @@ public class Screen_Scheduling extends JFrame {
     private JTable tabela;
     private DefaultTableModel modelo;
 
-    private static final Color FUNDO = new Color(243, 246, 250);
-    private static final Color AZUL = new Color(43, 78, 120);
-    private static final Color AZUL_CLARO = new Color(225, 236, 248);
-    private static final Color TEXTO = new Color(38, 50, 65);
-
     private static final DateTimeFormatter FORMATO_DATA_TELA = DateTimeFormatter.ofPattern("dd/MM/uuuu");
     private static final DateTimeFormatter FORMATO_HORARIO_TELA = DateTimeFormatter.ofPattern("HH:mm");
 
-    Control_Scheduling control = new Control_Scheduling();
+    private final Control_Scheduling control = new Control_Scheduling();
 
     public Screen_Scheduling() {
-        setTitle("Sistema de Agendamento");
-        setSize(900, 700);
+        setTitle("Agendamentos");
+        setSize(1000, 680);
         setMinimumSize(new Dimension(780, 620));
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -66,78 +73,85 @@ public class Screen_Scheduling extends JFrame {
     }
 
     private void criarComponentes() {
-        JPanel raiz = new JPanel(new BorderLayout(0, 18));
-        raiz.setBackground(FUNDO);
-        raiz.setBorder(new EmptyBorder(24, 28, 24, 28));
-        setContentPane(raiz);
+        JPanel root = new JPanel(new BorderLayout(18, 18));
+        root.setBackground(COR_FUNDO);
+        root.setBorder(new EmptyBorder(20, 20, 20, 20));
 
-        JPanel cabecalho = new JPanel(new BorderLayout(4, 6));
+        JPanel cabecalho = new JPanel(new BorderLayout());
         cabecalho.setOpaque(false);
 
         JLabel titulo = new JLabel("Agendamentos");
-        titulo.setFont(new Font("SansSerif", Font.BOLD, 28));
-        titulo.setForeground(AZUL);
+        titulo.setFont(new Font("SansSerif", Font.BOLD, 32));
+        titulo.setForeground(COR_TEXT);
 
-        JLabel subtitulo = new JLabel("Cadastre, consulte e gerencie seus horários");
+        JLabel subtitulo = new JLabel("Cadastre, consulte e gerencie os horários da sua agenda");
         subtitulo.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        subtitulo.setForeground(new Color(100, 112, 126));
+        subtitulo.setForeground(new Color(120, 120, 120));
 
-        cabecalho.add(titulo, BorderLayout.NORTH);
-        cabecalho.add(subtitulo, BorderLayout.SOUTH);
-        raiz.add(cabecalho, BorderLayout.NORTH);
+        JPanel blocoTitulo = new JPanel(new BorderLayout(0, 6));
+        blocoTitulo.setOpaque(false);
+        blocoTitulo.add(titulo, BorderLayout.NORTH);
+        blocoTitulo.add(subtitulo, BorderLayout.SOUTH);
 
-        JPanel cartaoFormulario = new JPanel(new BorderLayout(0, 16));
-        cartaoFormulario.setBackground(Color.WHITE);
-        cartaoFormulario.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(224, 230, 237)),
-                new EmptyBorder(18, 20, 18, 20)
-        ));
+        cabecalho.add(blocoTitulo, BorderLayout.WEST);
 
-        JLabel tituloFormulario = new JLabel("Dados do agendamento");
-        tituloFormulario.setFont(new Font("SansSerif", Font.BOLD, 17));
-        tituloFormulario.setForeground(TEXTO);
-        cartaoFormulario.add(tituloFormulario, BorderLayout.NORTH);
+        JButton btnNovo = new JButton("Novo agendamento");
+        btnNovo.setBackground(COR_PRIMARIA_2);
+        btnNovo.setForeground(Color.WHITE);
+        btnNovo.setFocusPainted(false);
+        btnNovo.setBorder(BorderFactory.createEmptyBorder(10, 18, 10, 18));
+        btnNovo.setFont(new Font("SansSerif", Font.BOLD, 15));
 
-        JPanel formulario = new JPanel(new GridBagLayout());
-        formulario.setOpaque(false);
+        JPanel headerRight = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        headerRight.setOpaque(false);
+        headerRight.add(btnNovo);
+
+        cabecalho.add(headerRight, BorderLayout.EAST);
+        root.add(cabecalho, BorderLayout.NORTH);
+
+        JPanel card = new RoundedPanel(COR_PANEL, 20);
+        card.setLayout(new BorderLayout(18, 18));
+        card.setBorder(new EmptyBorder(16, 16, 16, 16));
+
+        JLabel tituloForm = new JLabel("Dados do agendamento");
+        tituloForm.setFont(new Font("SansSerif", Font.BOLD, 22));
+        tituloForm.setForeground(COR_TEXT);
+
+        JPanel form = new JPanel(new GridBagLayout());
+        form.setOpaque(false);
 
         lblCodigo = criarLabel("Código");
         lblServico = criarLabel("Serviço");
-        lblData = criarLabel("Data (dd/MM/aaaa)");
-        lblHorario = criarLabel("Horário (HH:mm)");
+        lblData = criarLabel("Data");
+        lblHorario = criarLabel("Horário");
 
         txtCodigo = criarCampo();
         txtData = criarCampo();
         txtHorario = criarCampo();
 
         cbServico = new JComboBox<>(new String[]{"Luzes", "Alisamento", "Escova", "Progressiva"});
-        cbServico.setFont(new Font("SansSerif", Font.PLAIN, 14));
         cbServico.setPreferredSize(new Dimension(250, 36));
-        cbServico.setBackground(Color.WHITE);
+        cbServico.setFont(new Font("SansSerif", Font.PLAIN, 15));
 
-        adicionarCampo(formulario, lblCodigo, txtCodigo, 0, 0);
-        adicionarCampo(formulario, lblServico, cbServico, 1, 0);
-        adicionarCampo(formulario, lblData, txtData, 0, 1);
-        adicionarCampo(formulario, lblHorario, txtHorario, 1, 1);
+        adicionarCampo(form, lblCodigo, txtCodigo, 0, 0);
+        adicionarCampo(form, lblServico, cbServico, 1, 0);
+        adicionarCampo(form, lblData, txtData, 0, 1);
+        adicionarCampo(form, lblHorario, txtHorario, 1, 1);
 
-        cartaoFormulario.add(formulario, BorderLayout.CENTER);
-
-        JPanel botoes = new JPanel(new FlowLayout(FlowLayout.LEFT, 9, 0));
+        JPanel botoes = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         botoes.setOpaque(false);
 
-        btnAgendar = criarBotao("Agendar", AZUL, Color.WHITE);
-        btnAtualizar = criarBotao("Atualizar", AZUL_CLARO, AZUL);
-        btnExcluir = criarBotao("Excluir", new Color(252, 232, 232), new Color(160, 45, 45));
-        btnConsultar = criarBotao("Consultar", new Color(232, 239, 246), AZUL);
-        btnLimpar = criarBotao("Limpar", new Color(240, 242, 245), TEXTO);
+        btnAgendar = criarBotao("Agendar", COR_PRIMARIA_2, Color.WHITE);
+        btnAtualizar = criarBotao("Atualizar", COR_SECUNDARIA, COR_TEXT);
+        btnExcluir = criarBotao("Excluir", new Color(214, 72, 100), Color.WHITE);
+        btnConsultar = criarBotao("Consultar", new Color(220, 220, 220), COR_TEXT);
+        btnLimpar = criarBotao("Limpar", new Color(230, 230, 230), COR_TEXT);
 
         botoes.add(btnAgendar);
         botoes.add(btnAtualizar);
         botoes.add(btnExcluir);
         botoes.add(btnConsultar);
         botoes.add(btnLimpar);
-
-        cartaoFormulario.add(botoes, BorderLayout.SOUTH);
 
         modelo = new DefaultTableModel(new Object[]{"Código", "Data", "Horário", "Serviço"}, 0) {
             @Override
@@ -147,75 +161,58 @@ public class Screen_Scheduling extends JFrame {
         };
 
         tabela = new JTable(modelo);
-        tabela.setRowHeight(30);
-        tabela.setFont(new Font("SansSerif", Font.PLAIN, 13));
-        tabela.setForeground(TEXTO);
-        tabela.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tabela.setGridColor(new Color(232, 236, 241));
-        tabela.setShowVerticalLines(false);
-        tabela.setSelectionBackground(AZUL_CLARO);
-        tabela.setSelectionForeground(TEXTO);
+        tabela.setRowHeight(32);
+        tabela.setShowGrid(false);
+        tabela.setIntercellSpacing(new Dimension(0, 0));
+        tabela.setBackground(COR_PANEL);
+        tabela.setForeground(COR_TEXT);
+        tabela.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        tabela.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 14));
 
-        tabela.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 13));
-        tabela.getTableHeader().setBackground(new Color(236, 241, 247));
-        tabela.getTableHeader().setForeground(TEXTO);
-        tabela.getTableHeader().setPreferredSize(new Dimension(0, 34));
+        JScrollPane scroll = new JScrollPane(tabela);
+        scroll.setBorder(null);
 
-        JScrollPane rolagem = new JScrollPane(tabela);
-        rolagem.setBorder(BorderFactory.createLineBorder(new Color(224, 230, 237)));
-        rolagem.getViewport().setBackground(Color.WHITE);
+        card.add(tituloForm, BorderLayout.NORTH);
+        card.add(form, BorderLayout.CENTER);
+        card.add(botoes, BorderLayout.SOUTH);
 
-        JPanel cartaoTabela = new JPanel(new BorderLayout(0, 12));
-        cartaoTabela.setBackground(Color.WHITE);
-        cartaoTabela.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(224, 230, 237)),
-                new EmptyBorder(16, 18, 18, 18)
-        ));
+        JPanel tableCard = new RoundedPanel(COR_PANEL, 18);
+        tableCard.setLayout(new BorderLayout());
+        tableCard.setBorder(new EmptyBorder(12, 12, 12, 12));
+        tableCard.add(scroll, BorderLayout.CENTER);
 
-        JLabel tituloTabela = new JLabel("Agendamentos cadastrados");
-        tituloTabela.setFont(new Font("SansSerif", Font.BOLD, 17));
-        tituloTabela.setForeground(TEXTO);
+        root.add(card, BorderLayout.NORTH);
+        root.add(tableCard, BorderLayout.CENTER);
 
-        cartaoTabela.add(tituloTabela, BorderLayout.NORTH);
-        cartaoTabela.add(rolagem, BorderLayout.CENTER);
-
-        JPanel conteudo = new JPanel(new BorderLayout(0, 18));
-        conteudo.setOpaque(false);
-        conteudo.add(cartaoFormulario, BorderLayout.NORTH);
-        conteudo.add(cartaoTabela, BorderLayout.CENTER);
-
-        raiz.add(conteudo, BorderLayout.CENTER);
+        add(root);
     }
 
     private JLabel criarLabel(String texto) {
         JLabel label = new JLabel(texto);
-        label.setFont(new Font("SansSerif", Font.BOLD, 13));
-        label.setForeground(TEXTO);
+        label.setFont(new Font("SansSerif", Font.BOLD, 16));
+        label.setForeground(COR_TEXT);
         return label;
     }
 
     private JTextField criarCampo() {
-        JTextField campo = new JTextField();
-        campo.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        campo.setPreferredSize(new Dimension(250, 36));
-        campo.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(205, 214, 224)),
-                new EmptyBorder(5, 9, 5, 9)
+        JTextField field = new JTextField();
+        field.setFont(new Font("SansSerif", Font.PLAIN, 15));
+        field.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(210, 210, 210), 1),
+                new EmptyBorder(5, 10, 5, 10)
         ));
-        return campo;
+        field.setPreferredSize(new Dimension(250, 36));
+        return field;
     }
 
-    private JButton criarBotao(String texto, Color fundo, Color corTexto) {
-        JButton botao = new JButton(texto);
-        botao.setFont(new Font("SansSerif", Font.BOLD, 12));
-        botao.setForeground(corTexto);
-        botao.setBackground(fundo);
-        botao.setFocusPainted(false);
-        botao.setOpaque(true);
-        botao.setBorderPainted(false);
-        botao.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        botao.setMargin(new Insets(10, 14, 10, 14));
-        return botao;
+    private JButton criarBotao(String texto, Color bg, Color fg) {
+        JButton btn = new JButton(texto);
+        btn.setBackground(bg);
+        btn.setForeground(fg);
+        btn.setFocusPainted(false);
+        btn.setFont(new Font("SansSerif", Font.BOLD, 14));
+        btn.setBorder(BorderFactory.createEmptyBorder(10, 18, 10, 18));
+        return btn;
     }
 
     private void adicionarCampo(JPanel painel, JLabel label, JComponent campo, int coluna, int linha) {
@@ -269,23 +266,6 @@ public class Screen_Scheduling extends JFrame {
         }
     }
 
-    private void consultarAgendamentos() {
-        try {
-            modelo.setRowCount(0);
-            ArrayList<Model_Scheduling> lista = control.Consultar();
-            for (Model_Scheduling c : lista) {
-                modelo.addRow(new Object[]{
-                        c.getCodigo(),
-                        formatarDataParaTela(c.getData()),
-                        formatarHoraParaTela(c.getHorario()),
-                        c.getServico()
-                });
-            }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        }
-    }
-
     private void atualizar() {
         try {
             control.Atualizar(
@@ -313,13 +293,20 @@ public class Screen_Scheduling extends JFrame {
         }
     }
 
-    private void selecionarLinha() {
-        int linha = tabela.getSelectedRow();
-        if (linha >= 0) {
-            txtCodigo.setText(modelo.getValueAt(linha, 0).toString());
-            txtData.setText(modelo.getValueAt(linha, 1).toString());
-            txtHorario.setText(modelo.getValueAt(linha, 2).toString());
-            cbServico.setSelectedItem(modelo.getValueAt(linha, 3).toString());
+    private void consultarAgendamentos() {
+        try {
+            modelo.setRowCount(0);
+            ArrayList<Model_Scheduling> lista = control.Consultar();
+            for (Model_Scheduling c : lista) {
+                modelo.addRow(new Object[]{
+                        c.getCodigo(),
+                        formatarDataParaTela(c.getData()),
+                        formatarHoraParaTela(c.getHorario()),
+                        c.getServico()
+                });
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage());
         }
     }
 
@@ -338,5 +325,26 @@ public class Screen_Scheduling extends JFrame {
 
     private String formatarHoraParaTela(String horaBanco) {
         return LocalTime.parse(horaBanco).format(FORMATO_HORARIO_TELA);
+    }
+
+    static class RoundedPanel extends JPanel {
+        private final Color color;
+        private final int radius;
+
+        RoundedPanel(Color color, int radius) {
+            this.color = color;
+            this.radius = radius;
+            setOpaque(false);
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(color);
+            g2.fillRoundRect(0, 0, getWidth(), getHeight(), radius, radius);
+            g2.dispose();
+            super.paintComponent(g);
+        }
     }
 }

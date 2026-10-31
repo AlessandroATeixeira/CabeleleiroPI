@@ -1,32 +1,44 @@
 package Pck_View;
 
-import Pck_DAO.Conexao;
+import Pck_Control.Control_Client;
+import Pck_Model.Model_Client;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.util.ArrayList;
 
-
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
-import Pck_Model.Model_Client;
-import Pck_Control.Control_Client;
-
-
 public class Tela_Cliente extends JFrame {
+
+    private static final Color COR_PRIMARIA = new Color(86, 28, 36);
+    private static final Color COR_PRIMARIA_2 = new Color(109, 41, 50);
+    private static final Color COR_SECUNDARIA = new Color(199, 183, 163);
+    private static final Color COR_BEGE = new Color(232, 216, 196);
+    private static final Color COR_FUNDO = new Color(244, 239, 234);
+    private static final Color COR_PANEL = new Color(247, 244, 241);
+    private static final Color COR_TEXT = new Color(34, 34, 34);
+    private static final Color COR_MUTED = new Color(110, 110, 110);
 
     private JLabel lblTitulo;
     private JLabel lblCodigo;
@@ -44,81 +56,89 @@ public class Tela_Cliente extends JFrame {
 
     private JTable tabela;
     private DefaultTableModel modelo;
-    private JScrollPane barraRolagem;
 
-    Control_Client control = new Control_Client();
+    private final Control_Client control = new Control_Client();
 
     public Tela_Cliente() {
-
-        setTitle("Cadastro de Clientes");
-        setSize(700, 550);
+        setTitle("Clientes");
+        setSize(900, 620);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
-        setLayout(null);
+        setLayout(new BorderLayout());
 
         criarComponentes();
         criarEventos();
+        carregarTabela();
 
         setVisible(true);
     }
 
-    // CRIAR COMPONENTES
     private void criarComponentes() {
+        JPanel root = new JPanel(new BorderLayout(18, 18));
+        root.setBackground(COR_FUNDO);
+        root.setBorder(new EmptyBorder(20, 20, 20, 20));
 
-        lblTitulo = new JLabel(
-                "Cadastro de Clientes",
-                SwingConstants.CENTER
-        );
-        lblTitulo.setBounds(30, 5, 620, 30);
-        add(lblTitulo);
+        JPanel cabecalho = new JPanel(new BorderLayout());
+        cabecalho.setOpaque(false);
 
-        lblCodigo = new JLabel("Código:");
-        lblCodigo.setBounds(30, 45, 80, 25);
-        add(lblCodigo);
+        JLabel titulo = new JLabel("Cadastro de Clientes");
+        titulo.setFont(new Font("SansSerif", Font.BOLD, 32));
+        titulo.setForeground(COR_TEXT);
 
-        txtCodigo = new JTextField();
-        txtCodigo.setBounds(110, 45, 150, 25);
-        add(txtCodigo);
+        JButton btnNovo = new JButton("Novo cliente");
+        btnNovo.setBackground(COR_PRIMARIA_2);
+        btnNovo.setForeground(Color.WHITE);
+        btnNovo.setFocusPainted(false);
+        btnNovo.setBorder(BorderFactory.createEmptyBorder(10, 18, 10, 18));
+        btnNovo.setFont(new Font("SansSerif", Font.BOLD, 15));
 
-        lblNome = new JLabel("Nome:");
-        lblNome.setBounds(30, 80, 80, 25);
-        add(lblNome);
+        JPanel headerRight = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        headerRight.setOpaque(false);
+        headerRight.add(btnNovo);
 
-        txtNome = new JTextField();
-        txtNome.setBounds(110, 80, 300, 25);
-        add(txtNome);
+        cabecalho.add(titulo, BorderLayout.WEST);
+        cabecalho.add(headerRight, BorderLayout.EAST);
 
-        lblTelefone = new JLabel("Telefone:");
-        lblTelefone.setBounds(30, 115, 80, 25);
-        add(lblTelefone);
+        JPanel card = new RoundedPanel(COR_PANEL, 20);
+        card.setLayout(new BorderLayout(18, 18));
+        card.setBorder(new EmptyBorder(18, 18, 18, 18));
 
-        txtTelefone = new JTextField();
-        txtTelefone.setBounds(110, 115, 200, 25);
-        add(txtTelefone);
+        JPanel form = new JPanel(new java.awt.GridLayout(4, 2, 18, 18));
+        form.setOpaque(false);
 
-        btnInserir = new JButton("Inserir");
-        btnInserir.setBounds(30, 160, 110, 30);
-        add(btnInserir);
+        lblCodigo = criarLabel("Código:");
+        lblNome = criarLabel("Nome:");
+        lblTelefone = criarLabel("Telefone:");
 
+        txtCodigo = criarCampo();
+        txtNome = criarCampo();
+        txtTelefone = criarCampo();
 
+        form.add(lblCodigo);
+        form.add(txtCodigo);
+        form.add(lblNome);
+        form.add(txtNome);
+        form.add(lblTelefone);
+        form.add(txtTelefone);
 
-        btnAlterar = new JButton("Alterar");
-        btnAlterar.setBounds(270, 160, 110, 30);
-        add(btnAlterar);
+        JPanel botoes = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        botoes.setOpaque(false);
 
-        btnRemover = new JButton("Excluir");
-        btnRemover.setBounds(390, 160, 110, 30);
-        add(btnRemover);
+        btnInserir = criarBotao("Inserir", COR_PRIMARIA_2, Color.WHITE);
+        btnAlterar = criarBotao("Alterar", COR_SECUNDARIA, COR_TEXT);
+        btnRemover = criarBotao("Excluir", new Color(214, 72, 100), Color.WHITE);
+        btnLimpar = criarBotao("Limpar", new Color(220, 220, 220), COR_TEXT);
 
-        btnLimpar = new JButton("Limpar");
-        btnLimpar.setBounds(510, 160, 110, 30);
-        add(btnLimpar);
+        botoes.add(btnInserir);
+        botoes.add(btnAlterar);
+        botoes.add(btnRemover);
+        botoes.add(btnLimpar);
+
+        JPanel tabelaCard = new JPanel(new BorderLayout());
+        tabelaCard.setOpaque(false);
 
         modelo = new DefaultTableModel(
-                new Object[] {
-                        "Código", "Nome", "Telefone"
-                },
-                0
+                new Object[]{"Código", "Nome", "Telefone"}, 0
         ) {
             @Override
             public boolean isCellEditable(int linha, int coluna) {
@@ -127,76 +147,146 @@ public class Tela_Cliente extends JFrame {
         };
 
         tabela = new JTable(modelo);
-        tabela.setSelectionMode(
-                ListSelectionModel.SINGLE_SELECTION
-        );
+        tabela.setRowHeight(34);
+        tabela.setShowGrid(false);
+        tabela.setIntercellSpacing(new Dimension(0, 0));
+        tabela.setBackground(COR_PANEL);
+        tabela.setForeground(COR_TEXT);
+        tabela.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        tabela.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 14));
+        tabela.getTableHeader().setForeground(COR_TEXT);
 
-        barraRolagem = new JScrollPane(tabela);
-        barraRolagem.setBounds(30, 215, 620, 250);
-        add(barraRolagem);
+        JScrollPane scroll = new JScrollPane(tabela);
+        scroll.setBorder(null);
+        scroll.getViewport().setBackground(COR_PANEL);
+
+        tabelaCard.add(scroll, BorderLayout.CENTER);
+
+        card.add(form, BorderLayout.NORTH);
+        card.add(botoes, BorderLayout.SOUTH);
+        card.add(tabelaCard, BorderLayout.CENTER);
+
+        root.add(cabecalho, BorderLayout.NORTH);
+        root.add(card, BorderLayout.CENTER);
+
+        add(root);
     }
-
 
     private void criarEventos() {
-
-        btnAlterar.addActionListener(e -> alterarCliente());
         btnInserir.addActionListener(e -> inserirCliente());
+        btnAlterar.addActionListener(e -> alterarCliente());
         btnRemover.addActionListener(e -> excluirCliente());
+        btnLimpar.addActionListener(e -> limparCampos());
         tabela.getSelectionModel().addListSelectionListener(e -> selecionarLinha());
-
     }
 
-    private void selecionarLinha(){
-        int linha=tabela.getSelectedRow();
-        if(linha>=0){
-            txtCodigo.setText(modelo.getValueAt(linha,0).toString());
-            txtNome.setText(modelo.getValueAt(linha,1).toString());
-            txtTelefone.setText(modelo.getValueAt(linha,2).toString());
+    private void limparCampos() {
+        txtCodigo.setText("");
+        txtNome.setText("");
+        txtTelefone.setText("");
+        tabela.clearSelection();
+    }
+
+    private void selecionarLinha() {
+        int linha = tabela.getSelectedRow();
+        if (linha >= 0) {
+            txtCodigo.setText(modelo.getValueAt(linha, 0).toString());
+            txtNome.setText(modelo.getValueAt(linha, 1).toString());
+            txtTelefone.setText(modelo.getValueAt(linha, 2).toString());
         }
     }
-
 
     private void inserirCliente() {
         try {
             control.Inserir(txtCodigo.getText(), txtNome.getText(), txtTelefone.getText());
-            JOptionPane.showMessageDialog(this,"Cliente salvo com sucesso");
+            JOptionPane.showMessageDialog(this, "Cliente salvo com sucesso");
             carregarTabela();
-        }catch(Exception e) {
-            JOptionPane.showMessageDialog(this,e.getMessage());
+            limparCampos();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage());
         }
     }
-
 
     private void alterarCliente() {
         try {
             control.Atualizar(txtCodigo.getText(), txtNome.getText(), txtTelefone.getText());
-            JOptionPane.showMessageDialog(this,"Cliente Atualizado com sucesso");
+            JOptionPane.showMessageDialog(this, "Cliente atualizado com sucesso");
             carregarTabela();
-        }catch(Exception e) {
-            JOptionPane.showMessageDialog(this,e.getMessage());
+            limparCampos();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage());
         }
     }
 
     private void excluirCliente() {
         try {
             control.Excluir(txtCodigo.getText());
-            JOptionPane.showMessageDialog(this,"Cliente Excluido com sucesso");
+            JOptionPane.showMessageDialog(this, "Cliente excluído com sucesso");
             carregarTabela();
-        }catch(Exception e) {
-            JOptionPane.showMessageDialog(this,e.getMessage());
+            limparCampos();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage());
         }
     }
 
-    private void carregarTabela(){
-        try{
+    private void carregarTabela() {
+        try {
             modelo.setRowCount(0);
-            ArrayList<Model_Client> lista=control.Consultar();
-            for(Model_Client c:lista){
-                modelo.addRow(new Object[]{c.getCodigo(),c.getNome(), c.getTelefone()});
+            ArrayList<Model_Client> lista = control.Consultar();
+            for (Model_Client c : lista) {
+                modelo.addRow(new Object[]{c.getCodigo(), c.getNome(), c.getTelefone()});
             }
-        }catch(Exception e){
-            JOptionPane.showMessageDialog(this,e.getMessage());
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage());
         }
     }
 
+    private JLabel criarLabel(String texto) {
+        JLabel label = new JLabel(texto);
+        label.setFont(new Font("SansSerif", Font.BOLD, 16));
+        label.setForeground(COR_TEXT);
+        return label;
+    }
+
+    private JTextField criarCampo() {
+        JTextField field = new JTextField();
+        field.setFont(new Font("SansSerif", Font.PLAIN, 15));
+        field.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(210, 210, 210), 1),
+                new EmptyBorder(5, 10, 5, 10)
+        ));
+        field.setPreferredSize(new Dimension(220, 35));
+        return field;
+    }
+
+    private JButton criarBotao(String texto, Color bg, Color fg) {
+        JButton btn = new JButton(texto);
+        btn.setBackground(bg);
+        btn.setForeground(fg);
+        btn.setFocusPainted(false);
+        btn.setFont(new Font("SansSerif", Font.BOLD, 14));
+        btn.setBorder(BorderFactory.createEmptyBorder(10, 18, 10, 18));
+        return btn;
+    }
+
+    static class RoundedPanel extends JPanel {
+        private final Color color;
+        private final int radius;
+
+        RoundedPanel(Color color, int radius) {
+            this.color = color;
+            this.radius = radius;
+            setOpaque(false);
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(color);
+            g2.fillRoundRect(0, 0, getWidth(), getHeight(), radius, radius);
+            g2.dispose();
+            super.paintComponent(g);
+        }
+    }
 }
