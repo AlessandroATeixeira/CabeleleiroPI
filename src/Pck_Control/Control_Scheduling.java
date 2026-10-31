@@ -19,8 +19,8 @@ public class Control_Scheduling {
         Model_Scheduling objScheduling = new Model_Scheduling();
         objScheduling.setCodigo(Integer.parseInt(codigo.trim()));
         objScheduling.setServico(servico == null ? "" : servico.trim());
-        objScheduling.setData(converterDataParaBanco(data));
-        objScheduling.setHorario(converterHoraParaBanco(hora));
+        objScheduling.setData(LocalDate.parse(data.trim(), FORMATO_DATA).toString());
+        objScheduling.setHorario(LocalTime.parse(hora.trim(), FORMATO_HORA).toString());
         oPers.PersInsScheduling(objScheduling);
     }
 
@@ -28,8 +28,8 @@ public class Control_Scheduling {
         Model_Scheduling objScheduling = new Model_Scheduling();
         objScheduling.setCodigo(Integer.parseInt(codigo.trim()));
         objScheduling.setServico(servico == null ? "" : servico.trim());
-        objScheduling.setData(converterDataParaBanco(data));
-        objScheduling.setHorario(converterHoraParaBanco(hora));
+        objScheduling.setData(LocalDate.parse(data.trim(), FORMATO_DATA).toString());
+        objScheduling.setHorario(LocalTime.parse(hora.trim(), FORMATO_HORA).toString());
         oPers.PersUpdScheduling(objScheduling);
     }
 
@@ -39,19 +39,5 @@ public class Control_Scheduling {
 
     public ArrayList<Model_Scheduling> Consultar() throws Exception {
         return oPers.listScheduling();
-    }
-
-    private String converterDataParaBanco(String dataTela) {
-        if (dataTela == null || dataTela.trim().isEmpty()) {
-            throw new IllegalArgumentException("Data obrigatória");
-        }
-        return LocalDate.parse(dataTela.trim(), FORMATO_DATA).toString();
-    }
-
-    private String converterHoraParaBanco(String horaTela) {
-        if (horaTela == null || horaTela.trim().isEmpty()) {
-            throw new IllegalArgumentException("Horário obrigatório");
-        }
-        return LocalTime.parse(horaTela.trim(), FORMATO_HORA).toString();
     }
 }
