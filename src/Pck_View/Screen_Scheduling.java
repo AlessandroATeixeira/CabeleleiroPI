@@ -284,6 +284,7 @@ public class Screen_Scheduling extends JFrame {
         try {
             control.Inserir(txtCodigo.getText(), txtData.getText(), txtHorario.getText(), String.valueOf(cbServico.getNextFocusableComponent()));
             JOptionPane.showMessageDialog(this,"Cliente salvo com sucesso");
+            consultarAgendamentos();
         }catch(Exception e) {
             JOptionPane.showMessageDialog(this,e.getMessage());
         }
