@@ -26,6 +26,8 @@ public class Persistence_Product {
                 oCall.setString(2, Model_Product.getNome());
                 oCall.setDouble(3, Model_Product.getValorProd());
                 oCall.setInt(4, Model_Product.getEstoque());
+                oCall.execute();
+                oCall.close();
             }catch (SQLException e){e.printStackTrace();}
         }finally {oConectar.desconectar();}
     }
@@ -38,6 +40,8 @@ public class Persistence_Product {
                 oCall.setString(2, Model_Product.getNome());
                 oCall.setDouble(3, Model_Product.getValorProd());
                 oCall.setInt(4, Model_Product.getEstoque());
+                oCall.execute();
+                oCall.close();
             }catch (SQLException e){e.printStackTrace();}
         }finally {oConectar.desconectar();}
     }
