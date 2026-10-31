@@ -1,4 +1,4 @@
-/*
+
 DROP DATABASE IF EXISTS bd_cabeleireiro;
 CREATE DATABASE bd_cabeleireiro
 CHARACTER SET utf8mb4
@@ -446,4 +446,3 @@ DELETE FROM agendamento WHERE cod_agendamento = p_cod;
 END$$
 
         DELIMITER ;
-*/

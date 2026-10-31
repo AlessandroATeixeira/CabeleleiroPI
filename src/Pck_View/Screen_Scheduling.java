@@ -1,6 +1,10 @@
-package Pck_Model;
+package Pck_View;
 
+
+import Pck_Control.Control_Scheduling;
 import Pck_DAO.Conexao;
+import Pck_Model.Model_Client;
+import Pck_Model.Model_Scheduling;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -20,12 +24,13 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
-public class Agendamento_Model extends JFrame {
+public class Screen_Scheduling extends JFrame {
 
     private JLabel lblCodigo;
     private JLabel lblServico;
@@ -35,7 +40,7 @@ public class Agendamento_Model extends JFrame {
     private JTextField txtCodigo;
     private JTextField txtHorario;
     private JTextField txtData;
-    private JComboBox<String> cbServico;
+    public static JComboBox<String> cbServico;
 
     private JButton btnAgendar;
     private JButton btnExcluir;
@@ -55,8 +60,9 @@ public class Agendamento_Model extends JFrame {
             DateTimeFormatter.ofPattern("dd/MM/uuuu");
     private static final DateTimeFormatter FORMATO_HORARIO =
             DateTimeFormatter.ofPattern("HH:mm");
+    Control_Scheduling control = new Control_Scheduling();
 
-    public Agendamento_Model() {
+    public Screen_Scheduling() {
         setTitle("Sistema de Agendamento");
         setSize(900, 700);
         setMinimumSize(new Dimension(780, 620));
@@ -274,166 +280,53 @@ public class Agendamento_Model extends JFrame {
     }
 
     private void agendar() {
-        if (!validarCampos(true)) return;
-
-        try (Connection conexao = Conexao.conectar();
-             CallableStatement comando = conexao.prepareCall(
-                     "{CALL proc_ins_agendamento(?, ?, ?, ?)}")) {
-
-            comando.setInt(1, lerCodigo());
-            comando.setString(2, cbServico.getSelectedItem().toString());
-            comando.setDate(3, converterData(txtData.getText()));
-            comando.setTime(4, converterHorario(txtHorario.getText()));
-            comando.execute();
-
-            JOptionPane.showMessageDialog(this, "Agendamento cadastrado.");
-            limparCampos();
-            consultarAgendamentos();
-
-        } catch (NumberFormatException erro) {
-            mostrarErro("O código deve ser um número inteiro positivo.");
-        } catch (DateTimeParseException erro) {
-            mostrarErro("Data ou horário inválido. Use dd/MM/aaaa e HH:mm.");
-        } catch (SQLException erro) {
-            mostrarErro("Erro ao agendar: " + erro.getMessage());
+        try {
+            control.Inserir(txtCodigo.getText(), txtData.getText(), txtHorario.getText(), String.valueOf(cbServico.getNextFocusableComponent()));
+            JOptionPane.showMessageDialog(this,"Cliente salvo com sucesso");
+        }catch(Exception e) {
+            JOptionPane.showMessageDialog(this,e.getMessage());
         }
     }
 
     private void consultarAgendamentos() {
-        modelo.setRowCount(0);
-
-        try (Connection conexao = Conexao.conectar();
-             CallableStatement comando = conexao.prepareCall(
-                     "{CALL proc_selc_agendamentos()}");
-             ResultSet resultado = comando.executeQuery()) {
-
-            while (resultado.next()) {
-                modelo.addRow(new Object[]{
-                        resultado.getInt("cod_agendamento"),
-                        resultado.getDate("data_agendamento")
-                                .toLocalDate().format(FORMATO_DATA),
-                        resultado.getTime("horario")
-                                .toLocalTime().format(FORMATO_HORARIO),
-                        resultado.getString("servico")
-                });
+        try{
+            modelo.setRowCount(0);
+            ArrayList<Model_Scheduling> lista=control.Consultar();
+            for(Model_Scheduling c:lista){
+                modelo.addRow(new Object[]{c.getCodigo(),c.getServico(), c.getData(), c.getHorario()});
             }
-
-        } catch (SQLException erro) {
-            mostrarErro("Erro ao consultar agendamentos: " + erro.getMessage());
-            erro.printStackTrace();
+        }catch(Exception e){
+            JOptionPane.showMessageDialog(this,e.getMessage());
         }
+
     }
 
     private void atualizar() {
-        if (!validarCampos(true)) return;
-
-        try (Connection conexao = Conexao.conectar();
-             CallableStatement comando = conexao.prepareCall(
-                     "{CALL proc_upd_agendamento(?, ?, ?, ?)}")) {
-
-            comando.setInt(1, lerCodigo());
-            comando.setString(2, cbServico.getSelectedItem().toString());
-            comando.setDate(3, converterData(txtData.getText()));
-            comando.setTime(4, converterHorario(txtHorario.getText()));
-            comando.execute();
-
-            JOptionPane.showMessageDialog(this, "Agendamento atualizado.");
-            limparCampos();
-            consultarAgendamentos();
-
-        } catch (NumberFormatException erro) {
-            mostrarErro("O código deve ser um número inteiro positivo.");
-        } catch (DateTimeParseException erro) {
-            mostrarErro("Data ou horário inválido. Use dd/MM/aaaa e HH:mm.");
-        } catch (SQLException erro) {
-            mostrarErro("Erro ao atualizar: " + erro.getMessage());
+        try {
+            control.Atualizar(txtCodigo.getText(), txtData.getText(), txtHorario.getText(), String.valueOf(cbServico.getNextFocusableComponent()));
+            JOptionPane.showMessageDialog(this,"Cliente salvo com sucesso");
+        }catch(Exception e) {
+            JOptionPane.showMessageDialog(this,e.getMessage());
         }
     }
 
     private void excluir() {
-        if (txtCodigo.getText().trim().isEmpty()) {
-            mostrarErro("Informe o código ou selecione um agendamento.");
-            return;
-        }
-
         try {
-            int codigo = lerCodigo();
-
-            int resposta = JOptionPane.showConfirmDialog(
-                    this,
-                    "Deseja realmente excluir o agendamento " + codigo + "?",
-                    "Confirmar exclusão",
-                    JOptionPane.YES_NO_OPTION
-            );
-
-            if (resposta != JOptionPane.YES_OPTION) return;
-
-            try (Connection conexao = Conexao.conectar();
-                 CallableStatement comando = conexao.prepareCall(
-                         "{CALL proc_del_agendamento(?)}")) {
-                comando.setInt(1, codigo);
-                comando.execute();
-            }
-
-            JOptionPane.showMessageDialog(this, "Agendamento excluído.");
-            limparCampos();
-            consultarAgendamentos();
-
-        } catch (NumberFormatException erro) {
-            mostrarErro("O código deve ser um número inteiro positivo.");
-        } catch (SQLException erro) {
-            mostrarErro("Erro ao excluir: " + erro.getMessage());
+            control.Excluir(txtCodigo.getText());
+            JOptionPane.showMessageDialog(this,"Cliente Excluido com sucesso");
+        }catch(Exception e) {
+            JOptionPane.showMessageDialog(this,e.getMessage());
         }
     }
 
-    private boolean validarCampos(boolean exigirCodigo) {
-        if (exigirCodigo) {
-            try {
-                lerCodigo();
-            } catch (NumberFormatException erro) {
-                mostrarErro("Informe um código inteiro maior que zero.");
-                return false;
-            }
+    private void selecionarLinha(){
+        int linha=tabela.getSelectedRow();
+        if(linha>=0){
+            txtCodigo.setText(modelo.getValueAt(linha,0).toString());
+            cbServico.setSelectedIndex(Integer.parseInt(modelo.getValueAt(linha,1).toString()));
+            txtData.setText(modelo.getValueAt(linha,2).toString());
+            txtHorario.setText(modelo.getValueAt(linha,3).toString());
         }
-
-        if (cbServico.getSelectedItem() == null
-                || txtData.getText().trim().isEmpty()
-                || txtHorario.getText().trim().isEmpty()) {
-            mostrarErro("Preencha o serviço, a data e o horário.");
-            return false;
-        }
-
-        try {
-            converterData(txtData.getText());
-            converterHorario(txtHorario.getText());
-        } catch (DateTimeParseException erro) {
-            mostrarErro("Use a data dd/MM/aaaa e o horário HH:mm.");
-            return false;
-        }
-
-        return true;
-    }
-
-    private int lerCodigo() {
-        int codigo = Integer.parseInt(txtCodigo.getText().trim());
-        if (codigo <= 0) {
-            throw new NumberFormatException("O código deve ser positivo.");
-        }
-        return codigo;
-    }
-
-    private java.sql.Date converterData(String data) {
-        LocalDate dataConvertida = LocalDate.parse(
-                data.trim(), FORMATO_DATA
-        );
-        return java.sql.Date.valueOf(dataConvertida);
-    }
-
-    private java.sql.Time converterHorario(String horario) {
-        LocalTime horarioConvertido = LocalTime.parse(
-                horario.trim(), FORMATO_HORARIO
-        );
-        return java.sql.Time.valueOf(horarioConvertido);
     }
 
     private void limparCampos() {

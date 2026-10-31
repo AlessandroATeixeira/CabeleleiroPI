@@ -1,7 +1,5 @@
 package Pck_View;
 
-import Pck_Model.Agendamento_Model;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -151,7 +149,7 @@ public class Tela_Principal extends JFrame {
         btnAgendamento.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new Agendamento_Model();
+                new Screen_Scheduling();
             }
         });
 

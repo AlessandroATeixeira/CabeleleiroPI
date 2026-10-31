@@ -6,15 +6,59 @@ import java.sql.SQLException;
 
 public class Conexao {
 
-    public static Connection conectar() throws SQLException {
+    private  String sDriver;
+    private  String sServidor;
+    private  String sBase;
 
-        String url = "jdbc:mysql://127.0.0.1/bd_cabeleireiro";
-        String usuario = "root";
-        String senha = "swordfish";
+    private  String connStr;
 
-        Connection conexao =
-                DriverManager.getConnection(url, usuario, senha);
+    static Connection conn;
 
-        return conexao;
+    private static final String URL = "jdbc:mysql://127.0.0.1/bd_cabeleireiro";
+    private static final String login = "root";
+    private static final String senha = "1234";
+
+
+    public Conexao()
+    {
+        this.sDriver 	= "com.mysql.cj.jdbc.Driver";
+        this.sServidor = "localhost";
+        this.connStr    = "jdbc:mysql://127.0.0.1/bd_cabeleireiro";
     }
-} 
+
+    public Connection getConexao(String login, String senha) throws SQLException {
+        conn = null;
+        try {
+            Class.forName(sDriver);
+            conn = DriverManager.getConnection(connStr, login, senha);
+            System.out.println("Conectado");
+            return conn;
+        }
+
+        catch (ClassNotFoundException e) {
+            String errorMsg = "Driver nao encontrado";
+            throw new SQLException(errorMsg, e);
+        }
+        catch (SQLException e) {
+            String errorMsg = "Erro ao obter a conexao";
+            throw new SQLException(errorMsg, e);
+        }
+    }
+
+    public void desconectar() {
+        try {
+            if (conn != null) {
+                conn.close();
+                System.out.print("Desconectado passou aqui ");
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
+
+
+}
