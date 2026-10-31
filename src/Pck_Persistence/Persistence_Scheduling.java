@@ -55,10 +55,11 @@ public class Persistence_Scheduling {
     }
 
     public ArrayList<Model_Scheduling> listScheduling() throws SQLException {
-        ArrayList<Model_Scheduling> lista=new ArrayList<>();
-        oCall=oConectar.getConexao(login,senha).prepareCall("{CALL proc_selc_agendamentos()}");
-        oResultSet=oCall.executeQuery();
-        while(oResultSet.next()){
+        ArrayList<Model_Scheduling> lista = new ArrayList<>();
+        oCall = oConectar.getConexao(login, senha).prepareCall("{CALL proc_selc_agendamentos()}");
+        oResultSet = oCall.executeQuery();
+
+        while (oResultSet.next()) {
             Model_Scheduling objScheduling = new Model_Scheduling();
             objScheduling.setCodigo(oResultSet.getInt("cod_agendamento"));
             objScheduling.setServico(oResultSet.getString("servico"));
@@ -66,6 +67,7 @@ public class Persistence_Scheduling {
             objScheduling.setHorario(oResultSet.getString("horario"));
             lista.add(objScheduling);
         }
+
         oResultSet.close();
         oCall.close();
         return lista;

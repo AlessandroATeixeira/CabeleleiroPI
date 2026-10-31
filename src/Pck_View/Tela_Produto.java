@@ -157,8 +157,8 @@ public class Tela_Produto extends JFrame {
         btnAlterar.addActionListener(e -> alterarProduto());
         btnInserir.addActionListener(e -> inserirProduto());
         btnRemover.addActionListener(e -> excluirProduto());
+        btnConsultar.addActionListener(e -> carregarTabela());
         tabela.getSelectionModel().addListSelectionListener(e -> selecionarLinha());
-
     }
 
     private void selecionarLinha(){
