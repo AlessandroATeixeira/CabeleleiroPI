@@ -13,19 +13,20 @@ public class Persistence_Scheduling {
     ResultSet oResultSet;
     private static final String login = "root";
     private static final String senha = "1234";
-    public void PersInsScheduling(Model_Scheduling Model_Scheduling){
+    public void PersInsScheduling(Model_Scheduling modelScheduling) {
         try {
-            try {
-                oCall = oConectar.getConexao(login,senha).prepareCall("CALL proc_ins_agendamento(?, ?, ?, ?)");
-                oCall.setInt(1, Model_Scheduling.getCodigo());
-                oCall.setString(2, Model_Scheduling.getServico());
-                oCall.setDate(3, Date.valueOf(Model_Scheduling.getData()));
-                oCall.setTime(4, Time.valueOf(Model_Scheduling.getHorario()));
-                oCall.execute();
-                oCall.close();
-
-            }catch (SQLException e) {e.printStackTrace();}
-        }finally { oConectar.desconectar();}
+            oCall = oConectar.getConexao(login, senha).prepareCall("CALL proc_ins_agendamento(?, ?, ?, ?)");
+            oCall.setInt(1, modelScheduling.getCodigo());
+            oCall.setString(2, modelScheduling.getServico());
+            oCall.setDate(3, Date.valueOf(modelScheduling.getData()));
+            oCall.setTime(4, Time.valueOf(modelScheduling.getHorario()));
+            oCall.execute();
+            oCall.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            oConectar.desconectar();
+        }
     }
 
     public void PersUpdScheduling(Model_Scheduling Model_Scheduling){

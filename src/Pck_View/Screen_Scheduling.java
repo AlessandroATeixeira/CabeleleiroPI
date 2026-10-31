@@ -1,9 +1,6 @@
 package Pck_View;
 
-
 import Pck_Control.Control_Scheduling;
-import Pck_DAO.Conexao;
-import Pck_Model.Model_Client;
 import Pck_Model.Model_Scheduling;
 
 import java.awt.BorderLayout;
@@ -14,16 +11,9 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 
 import javax.swing.*;
@@ -56,10 +46,9 @@ public class Screen_Scheduling extends JFrame {
     private static final Color AZUL_CLARO = new Color(225, 236, 248);
     private static final Color TEXTO = new Color(38, 50, 65);
 
-    private static final DateTimeFormatter FORMATO_DATA =
-            DateTimeFormatter.ofPattern("dd/MM/uuuu");
-    private static final DateTimeFormatter FORMATO_HORARIO =
-            DateTimeFormatter.ofPattern("HH:mm");
+    private static final DateTimeFormatter FORMATO_DATA_TELA = DateTimeFormatter.ofPattern("dd/MM/uuuu");
+    private static final DateTimeFormatter FORMATO_HORARIO_TELA = DateTimeFormatter.ofPattern("HH:mm");
+
     Control_Scheduling control = new Control_Scheduling();
 
     public Screen_Scheduling() {
@@ -82,7 +71,6 @@ public class Screen_Scheduling extends JFrame {
         raiz.setBorder(new EmptyBorder(24, 28, 24, 28));
         setContentPane(raiz);
 
-        // Cabeçalho
         JPanel cabecalho = new JPanel(new BorderLayout(4, 6));
         cabecalho.setOpaque(false);
 
@@ -90,9 +78,7 @@ public class Screen_Scheduling extends JFrame {
         titulo.setFont(new Font("SansSerif", Font.BOLD, 28));
         titulo.setForeground(AZUL);
 
-        JLabel subtitulo = new JLabel(
-                "Cadastre, consulte e gerencie seus horários"
-        );
+        JLabel subtitulo = new JLabel("Cadastre, consulte e gerencie seus horários");
         subtitulo.setFont(new Font("SansSerif", Font.PLAIN, 14));
         subtitulo.setForeground(new Color(100, 112, 126));
 
@@ -100,7 +86,6 @@ public class Screen_Scheduling extends JFrame {
         cabecalho.add(subtitulo, BorderLayout.SOUTH);
         raiz.add(cabecalho, BorderLayout.NORTH);
 
-        // Formulário
         JPanel cartaoFormulario = new JPanel(new BorderLayout(0, 16));
         cartaoFormulario.setBackground(Color.WHITE);
         cartaoFormulario.setBorder(BorderFactory.createCompoundBorder(
@@ -125,9 +110,7 @@ public class Screen_Scheduling extends JFrame {
         txtData = criarCampo();
         txtHorario = criarCampo();
 
-        cbServico = new JComboBox<>(new String[]{
-                "Luzes", "Alisamento", "Escova", "Progressiva"
-        });
+        cbServico = new JComboBox<>(new String[]{"Luzes", "Alisamento", "Escova", "Progressiva"});
         cbServico.setFont(new Font("SansSerif", Font.PLAIN, 14));
         cbServico.setPreferredSize(new Dimension(250, 36));
         cbServico.setBackground(Color.WHITE);
@@ -144,8 +127,7 @@ public class Screen_Scheduling extends JFrame {
 
         btnAgendar = criarBotao("Agendar", AZUL, Color.WHITE);
         btnAtualizar = criarBotao("Atualizar", AZUL_CLARO, AZUL);
-        btnExcluir = criarBotao("Excluir", new Color(252, 232, 232),
-                new Color(160, 45, 45));
+        btnExcluir = criarBotao("Excluir", new Color(252, 232, 232), new Color(160, 45, 45));
         btnConsultar = criarBotao("Consultar", new Color(232, 239, 246), AZUL);
         btnLimpar = criarBotao("Limpar", new Color(240, 242, 245), TEXTO);
 
@@ -157,10 +139,7 @@ public class Screen_Scheduling extends JFrame {
 
         cartaoFormulario.add(botoes, BorderLayout.SOUTH);
 
-        // Tabela
-        modelo = new DefaultTableModel(
-                new Object[]{"Código", "Data", "Horário", "Serviço"}, 0
-        ) {
+        modelo = new DefaultTableModel(new Object[]{"Código", "Data", "Horário", "Serviço"}, 0) {
             @Override
             public boolean isCellEditable(int linha, int coluna) {
                 return false;
@@ -177,17 +156,13 @@ public class Screen_Scheduling extends JFrame {
         tabela.setSelectionBackground(AZUL_CLARO);
         tabela.setSelectionForeground(TEXTO);
 
-        tabela.getTableHeader().setFont(
-                new Font("SansSerif", Font.BOLD, 13)
-        );
+        tabela.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 13));
         tabela.getTableHeader().setBackground(new Color(236, 241, 247));
         tabela.getTableHeader().setForeground(TEXTO);
         tabela.getTableHeader().setPreferredSize(new Dimension(0, 34));
 
         JScrollPane rolagem = new JScrollPane(tabela);
-        rolagem.setBorder(BorderFactory.createLineBorder(
-                new Color(224, 230, 237)
-        ));
+        rolagem.setBorder(BorderFactory.createLineBorder(new Color(224, 230, 237)));
         rolagem.getViewport().setBackground(Color.WHITE);
 
         JPanel cartaoTabela = new JPanel(new BorderLayout(0, 12));
@@ -243,8 +218,7 @@ public class Screen_Scheduling extends JFrame {
         return botao;
     }
 
-    private void adicionarCampo(JPanel painel, JLabel label,
-                                JComponent campo, int coluna, int linha) {
+    private void adicionarCampo(JPanel painel, JLabel label, JComponent campo, int coluna, int linha) {
         GridBagConstraints gbcLabel = new GridBagConstraints();
         gbcLabel.gridx = coluna * 2;
         gbcLabel.gridy = linha;
@@ -267,7 +241,6 @@ public class Screen_Scheduling extends JFrame {
         btnAtualizar.addActionListener(e -> atualizar());
         btnExcluir.addActionListener(e -> excluir());
         btnLimpar.addActionListener(e -> limparCampos());
-        tabela.getSelectionModel().addListSelectionListener(e -> selecionarLinha());
 
         tabela.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting() && tabela.getSelectedRow() != -1) {
@@ -282,59 +255,71 @@ public class Screen_Scheduling extends JFrame {
 
     private void agendar() {
         try {
-            control.Inserir(txtCodigo.getText(),
-                            txtData.getText(),
-                            txtHorario.getText(),
-                            cbServico.getSelectedItem().toString()
+            control.Inserir(
+                    txtCodigo.getText(),
+                    String.valueOf(cbServico.getSelectedItem()),
+                    txtData.getText(),
+                    txtHorario.getText()
             );
-            JOptionPane.showMessageDialog(this,"Agendamento salvo com sucesso");
+            JOptionPane.showMessageDialog(this, "Agendamento salvo com sucesso");
             consultarAgendamentos();
-        }catch(Exception e) {
-            JOptionPane.showMessageDialog(this,e.getMessage());
+            limparCampos();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage());
         }
     }
 
     private void consultarAgendamentos() {
-        try{
+        try {
             modelo.setRowCount(0);
-            ArrayList<Model_Scheduling> lista=control.Consultar();
-            for(Model_Scheduling c:lista){
-                modelo.addRow(new Object[]{ c.getCodigo(),
-                                            LocalDate.parse(c.getData()).format(FORMATO_DATA),
-                                            LocalTime.parse(c.getHorario()).format(FORMATO_HORARIO),
-                                            c.getServico()});
+            ArrayList<Model_Scheduling> lista = control.Consultar();
+            for (Model_Scheduling c : lista) {
+                modelo.addRow(new Object[]{
+                        c.getCodigo(),
+                        formatarDataParaTela(c.getData()),
+                        formatarHoraParaTela(c.getHorario()),
+                        c.getServico()
+                });
             }
-        }catch(Exception e){
-            JOptionPane.showMessageDialog(this,e.getMessage());
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage());
         }
-
     }
 
     private void atualizar() {
         try {
-            control.Atualizar(txtCodigo.getText(), txtData.getText(), txtHorario.getText(), String.valueOf(cbServico.getNextFocusableComponent()));
-            JOptionPane.showMessageDialog(this,"Cliente salvo com sucesso");
-        }catch(Exception e) {
-            JOptionPane.showMessageDialog(this,e.getMessage());
+            control.Atualizar(
+                    txtCodigo.getText(),
+                    String.valueOf(cbServico.getSelectedItem()),
+                    txtData.getText(),
+                    txtHorario.getText()
+            );
+            JOptionPane.showMessageDialog(this, "Agendamento atualizado com sucesso");
+            consultarAgendamentos();
+            limparCampos();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage());
         }
     }
 
     private void excluir() {
         try {
             control.Excluir(txtCodigo.getText());
-            JOptionPane.showMessageDialog(this,"Cliente Excluido com sucesso");
-        }catch(Exception e) {
-            JOptionPane.showMessageDialog(this,e.getMessage());
+            JOptionPane.showMessageDialog(this, "Agendamento excluído com sucesso");
+            consultarAgendamentos();
+            limparCampos();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage());
         }
     }
 
-    private void selecionarLinha(){
-        int linha=tabela.getSelectedRow();
-        if(linha>=0){
-            txtCodigo.setText(modelo.getValueAt(linha,0).toString());
-            cbServico.setSelectedIndex(Integer.parseInt(modelo.getValueAt(linha,1).toString()));
-            txtData.setText(modelo.getValueAt(linha,2).toString());
-            txtHorario.setText(modelo.getValueAt(linha,3).toString());
+    private void selecionarLinha() {
+        int linha = tabela.getSelectedRow();
+        if (linha >= 0) {
+            txtCodigo.setText(modelo.getValueAt(linha, 0).toString());
+            txtData.setText(modelo.getValueAt(linha, 1).toString());
+            txtHorario.setText(modelo.getValueAt(linha, 2).toString());
+            cbServico.setSelectedItem(modelo.getValueAt(linha, 3).toString());
         }
     }
 
@@ -347,4 +332,11 @@ public class Screen_Scheduling extends JFrame {
         txtCodigo.requestFocusInWindow();
     }
 
+    private String formatarDataParaTela(String dataBanco) {
+        return LocalDate.parse(dataBanco).format(FORMATO_DATA_TELA);
+    }
+
+    private String formatarHoraParaTela(String horaBanco) {
+        return LocalTime.parse(horaBanco).format(FORMATO_HORARIO_TELA);
+    }
 }
