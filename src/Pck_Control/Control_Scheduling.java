@@ -12,6 +12,7 @@ public class Control_Scheduling {
 
     private static final DateTimeFormatter FORMATO_DATA = DateTimeFormatter.ofPattern("dd/MM/uuuu");
     private static final DateTimeFormatter FORMATO_HORA = DateTimeFormatter.ofPattern("HH:mm");
+    private static final DateTimeFormatter FORMATO_HORA_BD = DateTimeFormatter.ofPattern("HH:mm:ss");
 
     Persistence_Scheduling oPers = new Persistence_Scheduling();
 
@@ -20,7 +21,7 @@ public class Control_Scheduling {
         objScheduling.setCodigo(Integer.parseInt(codigo.trim()));
         objScheduling.setServico(servico == null ? "" : servico.trim());
         objScheduling.setData(LocalDate.parse(data.trim(), FORMATO_DATA).toString());
-        objScheduling.setHorario(LocalTime.parse(hora.trim(), FORMATO_HORA).toString());
+        objScheduling.setHorario(LocalTime.parse(hora.trim(), FORMATO_HORA).format(FORMATO_HORA_BD));
         oPers.PersInsScheduling(objScheduling);
     }
 
@@ -29,7 +30,7 @@ public class Control_Scheduling {
         objScheduling.setCodigo(Integer.parseInt(codigo.trim()));
         objScheduling.setServico(servico == null ? "" : servico.trim());
         objScheduling.setData(LocalDate.parse(data.trim(), FORMATO_DATA).toString());
-        objScheduling.setHorario(LocalTime.parse(hora.trim(), FORMATO_HORA).toString());
+        objScheduling.setHorario(LocalTime.parse(hora.trim(), FORMATO_HORA).format(FORMATO_HORA_BD));
         oPers.PersUpdScheduling(objScheduling);
     }
 
