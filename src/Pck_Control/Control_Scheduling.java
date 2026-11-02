@@ -17,25 +17,47 @@ public class Control_Scheduling {
     Persistence_Scheduling oPers = new Persistence_Scheduling();
 
     public void Inserir(String codigo, String servico, String data, String hora) throws Exception {
+        int codigoInt = Integer.parseInt(codigo.trim());
+        if (codigoInt <= 0) {
+            throw new Exception("O código do agendamento deve ser maior que zero.");
+        }
+
+        if (servico == null || servico.trim().isEmpty()) {
+            throw new Exception("Informe o serviço selecionado.");
+        }
+
         Model_Scheduling objScheduling = new Model_Scheduling();
-        objScheduling.setCodigo(Integer.parseInt(codigo.trim()));
-        objScheduling.setServico(servico == null ? "" : servico.trim());
+        objScheduling.setCodigo(codigoInt);
+        objScheduling.setServico(servico.trim());
         objScheduling.setData(LocalDate.parse(data.trim(), FORMATO_DATA).toString());
         objScheduling.setHorario(LocalTime.parse(hora.trim(), FORMATO_HORA).format(FORMATO_HORA_BD));
         oPers.PersInsScheduling(objScheduling);
     }
 
     public void Atualizar(String codigo, String servico, String data, String hora) throws Exception {
+        int codigoInt = Integer.parseInt(codigo.trim());
+        if (codigoInt <= 0) {
+            throw new Exception("O código do agendamento deve ser maior que zero.");
+        }
+
+        if (servico == null || servico.trim().isEmpty()) {
+            throw new Exception("Informe o serviço selecionado.");
+        }
+
         Model_Scheduling objScheduling = new Model_Scheduling();
-        objScheduling.setCodigo(Integer.parseInt(codigo.trim()));
-        objScheduling.setServico(servico == null ? "" : servico.trim());
+        objScheduling.setCodigo(codigoInt);
+        objScheduling.setServico(servico.trim());
         objScheduling.setData(LocalDate.parse(data.trim(), FORMATO_DATA).toString());
         objScheduling.setHorario(LocalTime.parse(hora.trim(), FORMATO_HORA).format(FORMATO_HORA_BD));
         oPers.PersUpdScheduling(objScheduling);
     }
 
     public void Excluir(String codigo) throws Exception {
-        oPers.PersExcScheduling(Integer.parseInt(codigo.trim()));
+        int codigoInt = Integer.parseInt(codigo.trim());
+        if (codigoInt <= 0) {
+            throw new Exception("O código a ser excluído deve ser maior que zero.");
+        }
+        oPers.PersExcScheduling(codigoInt);
     }
 
     public ArrayList<Model_Scheduling> Consultar() throws Exception {
