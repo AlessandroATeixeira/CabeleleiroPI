@@ -19,6 +19,9 @@ import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
+import Pck_Control.Control_Caixa;
+import Pck_Model.Model_RelatorioCaixa;
+
 public class Tela_Relatorio_Caixa extends Tela_Base {
 
     private JComboBox<String> comboPeriodo;
@@ -29,8 +32,10 @@ public class Tela_Relatorio_Caixa extends Tela_Base {
     private DefaultTableModel modelo;
     private ChartPanel grafico;
 
+    private final Control_Caixa control = new Control_Caixa();
+
     public Tela_Relatorio_Caixa() {
-        super("Relatórios", "Entradas, saídas e saldo do caixa por período.");
+        super("Relatórios", "Entradas, saídas e saldo calculados a partir das movimentações do caixa.");
         criarComponentes();
     }
 
@@ -147,20 +152,26 @@ public class Tela_Relatorio_Caixa extends Tela_Base {
         modelo.setRowCount(0);
 
         String periodoSelecionado = String.valueOf(comboPeriodo.getSelectedItem());
-        List<ResumoPeriodo> dados = gerarDadosExemplo(periodoSelecionado);
+        List<Model_RelatorioCaixa> dados;
+        try {
+            dados = control.Resumo(periodoSelecionado);
+        } catch (Exception e) {
+            dados = new ArrayList<>();
+            mostrarErro(e);
+        }
 
         double totalEntradas = 0;
         double totalSaidas = 0;
 
-        for (ResumoPeriodo item : dados) {
+        for (Model_RelatorioCaixa item : dados) {
             modelo.addRow(new Object[]{
-                    item.periodo,
-                    Tema.moedaCurta(item.entradas),
-                    Tema.moedaCurta(item.saidas),
-                    Tema.moedaCurta(item.entradas - item.saidas)
+                    item.getPeriodo(),
+                    Tema.moedaCurta(item.getEntradas()),
+                    Tema.moedaCurta(item.getSaidas()),
+                    Tema.moedaCurta(item.getSaldo())
             });
-            totalEntradas += item.entradas;
-            totalSaidas += item.saidas;
+            totalEntradas += item.getEntradas();
+            totalSaidas += item.getSaidas();
         }
 
         lblTotalEntradas.setText(Tema.moeda(totalEntradas));
@@ -170,45 +181,19 @@ public class Tela_Relatorio_Caixa extends Tela_Base {
         grafico.setDados(dados);
     }
 
-    private List<ResumoPeriodo> gerarDadosExemplo(String periodo) {
-        List<ResumoPeriodo> dados = new ArrayList<>();
-
-        if (periodo.equals("Mensal")) {
-            dados.add(new ResumoPeriodo("Jan", 8500, 4200));
-            dados.add(new ResumoPeriodo("Fev", 9200, 4600));
-            dados.add(new ResumoPeriodo("Mar", 7800, 3900));
-            dados.add(new ResumoPeriodo("Abr", 10100, 5100));
-            dados.add(new ResumoPeriodo("Mai", 11200, 5400));
-            dados.add(new ResumoPeriodo("Jun", 9800, 4800));
-        }
-
-        if (periodo.equals("Semestral")) {
-            dados.add(new ResumoPeriodo("1º Semestre", 56800, 28000));
-            dados.add(new ResumoPeriodo("2º Semestre", 62100, 30500));
-        }
-
-        if (periodo.equals("Anual")) {
-            dados.add(new ResumoPeriodo("2024", 118900, 58200));
-            dados.add(new ResumoPeriodo("2025", 132500, 64100));
-            dados.add(new ResumoPeriodo("2026", 145700, 69300));
-        }
-
-        return dados;
-    }
-
     // ------------------------------------------------------------------
     // Grafico de barras
     // ------------------------------------------------------------------
     private static class ChartPanel extends JPanel {
 
-        private List<ResumoPeriodo> dados = new ArrayList<>();
+        private List<Model_RelatorioCaixa> dados = new ArrayList<>();
 
         ChartPanel() {
             setOpaque(false);
             setPreferredSize(new Dimension(300, 240));
         }
 
-        void setDados(List<ResumoPeriodo> dados) {
+        void setDados(List<Model_RelatorioCaixa> dados) {
             this.dados = dados;
             repaint();
         }
@@ -235,9 +220,12 @@ public class Tela_Relatorio_Caixa extends Tela_Base {
                 return;
             }
 
-            double maiorValor = 1;
-            for (ResumoPeriodo item : dados) {
-                maiorValor = Math.max(maiorValor, Math.max(item.entradas, item.saidas));
+            double maiorValor = 0;
+            if (maiorValor <= 0) {
+                for (Model_RelatorioCaixa item : dados) {
+                    maiorValor = Math.max(maiorValor, Math.max(item.getEntradas(), item.getSaidas()));
+                }
+                maiorValor = 100;   // sem movimentacao: eixo padrao
             }
 
             maiorValor = escalaMaxima(maiorValor);
@@ -263,11 +251,11 @@ public class Tela_Relatorio_Caixa extends Tela_Base {
 
             g.setClip(0, 0, largura, base);
             for (int i = 0; i < n; i++) {
-                ResumoPeriodo item = dados.get(i);
+                Model_RelatorioCaixa item = dados.get(i);
                 int xCentro = margemEsquerda + i * larguraGrupo + larguraGrupo / 2;
 
-                int hEntrada = (int) (item.entradas / maiorValor * areaAltura);
-                int hSaida = (int) (item.saidas / maiorValor * areaAltura);
+                int hEntrada = (int) (item.getEntradas() / maiorValor * areaAltura);
+                int hSaida = (int) (item.getSaidas() / maiorValor * areaAltura);
 
                 g.setColor(Tema.VINHO);
                 g.fillRoundRect(xCentro - larguraBarra - 3, base - hEntrada, larguraBarra, hEntrada + 8, 8, 8);
@@ -280,7 +268,7 @@ public class Tela_Relatorio_Caixa extends Tela_Base {
             g.setColor(Tema.TEXTO_SUAVE);
             g.setFont(Tema.fonte(Font.PLAIN, 12));
             for (int i = 0; i < n; i++) {
-                String periodo = dados.get(i).periodo;
+                String periodo = dados.get(i).getPeriodo();
                 int xCentro = margemEsquerda + i * larguraGrupo + larguraGrupo / 2;
                 int w = g.getFontMetrics().stringWidth(periodo);
                 g.drawString(periodo, xCentro - w / 2, base + 19);
@@ -291,7 +279,7 @@ public class Tela_Relatorio_Caixa extends Tela_Base {
         /** Arredonda o maior valor para cima, de modo que 4 divisoes deem numeros redondos. */
         private double escalaMaxima(double maximo) {
             double magnitude = Math.pow(10, Math.floor(Math.log10(maximo)));
-            double[] candidatos = {1.2, 1.6, 2, 2.4, 3.2, 4, 6, 8, 10};
+            double[] candidatos = {1, 1.2, 1.6, 2, 2.4, 3.2, 4, 6, 8, 10};
             for (double c : candidatos) {
                 if (c * magnitude >= maximo) {
                     return c * magnitude;
@@ -307,18 +295,6 @@ public class Tela_Relatorio_Caixa extends Tela_Base {
                 return String.format(fmt, mil).replace('.', ',');
             }
             return String.format("R$ %.0f", valor);
-        }
-    }
-
-    private static class ResumoPeriodo {
-        private final String periodo;
-        private final double entradas;
-        private final double saidas;
-
-        ResumoPeriodo(String periodo, double entradas, double saidas) {
-            this.periodo = periodo;
-            this.entradas = entradas;
-            this.saidas = saidas;
         }
     }
 }
