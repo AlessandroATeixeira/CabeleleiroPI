@@ -14,6 +14,12 @@ public class Control_Product {
             throw new Exception("O código do produto deve ser maior que zero.");
         }
 
+        for (Model_Product produto : oPers.listProduct()) {
+            if (produto.getCodigo() == codigoInt) {
+                throw new Exception("Já existe um produto com esse código.");
+            }
+        }
+
         int estoqueInt = Integer.parseInt(estoque);
         if (estoqueInt < 0) {
             throw new Exception("O estoque não pode ser negativo.");
