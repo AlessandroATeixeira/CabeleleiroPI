@@ -14,9 +14,10 @@ public class Control_Client {
             throw new Exception("O código do cliente deve ser maior que zero.");
         }
 
-        String apenasNumeros = telefone.replaceAll("\\D", "");
-        if (!apenasNumeros.matches("\\d{11}")) {
-            throw new Exception("Informe o telefone com DDD e 11 dígitos, por favor.");
+        for(Model_Client client : oPers.listClient()){
+            if(client.getCodigo() == codigoInt){
+                throw new Exception("Ja existe um cliente com esse codigo");
+            }
         }
 
         Model_Client objClient = new Model_Client();
@@ -30,11 +31,6 @@ public class Control_Client {
         int codigoInt = Integer.parseInt(codigo);
         if (codigoInt <= 0) {
             throw new Exception("O código do cliente deve ser maior que zero.");
-        }
-
-        String apenasNumeros = telefone.replaceAll("\\D", "");
-        if (!apenasNumeros.matches("\\d{11}")) {
-            throw new Exception("Informe o telefone com DDD e 11 dígitos, por favor.");
         }
 
         Model_Client objClient = new Model_Client();

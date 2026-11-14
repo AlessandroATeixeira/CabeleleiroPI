@@ -28,10 +28,6 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
-/**
- * Janela unica do sistema: menu lateral + area de conteudo onde as telas
- * de funcionalidade sao exibidas (sem abrir janelas separadas).
- */
 public class Tela_Principal extends JFrame {
 
     private static final int LARGURA_MENU = 250;
@@ -49,7 +45,6 @@ public class Tela_Principal extends JFrame {
         setLocationRelativeTo(null);
 
         JPanel raiz = new JPanel(new BorderLayout());
-        raiz.setBackground(Tema.CREME);
         setContentPane(raiz);
 
         area.setBackground(Tema.CREME);

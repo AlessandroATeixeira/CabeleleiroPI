@@ -19,6 +19,13 @@ public class Control_Product {
             throw new Exception("O estoque não pode ser negativo.");
         }
 
+
+        for (Model_Product product : oPers.listProduct()){
+            if(product.getCodigo() == codigoInt){
+                throw new Exception("Ja existe um produto com esse codigo ");
+            }
+        }
+
         double valorDouble = Double.parseDouble(valorProd.replace(",", "."));
         if (valorDouble < 0) {
             throw new Exception("O valor do produto não pode ser negativo.");
@@ -34,6 +41,7 @@ public class Control_Product {
 
     public void Atualizar(String codigo, String nome, String valorProd, String estoque) throws Exception {
         int codigoInt = Integer.parseInt(codigo);
+
         if (codigoInt <= 0) {
             throw new Exception("O código do produto deve ser maior que zero.");
         }
