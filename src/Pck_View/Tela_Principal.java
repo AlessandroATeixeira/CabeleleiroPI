@@ -96,7 +96,8 @@ public class Tela_Principal extends JFrame {
 
         barra.add(new Grupo("Cadastros", Icone.PESSOA,
                 itemTela("Clientes", new Tela_Cliente()),
-                itemTela("Produtos", new Tela_Produto())));
+                itemTela("Produtos", new Tela_Produto()),
+                itemTela("Serviços", new Tela_Servico())));
         barra.add(new Grupo("Operação", Icone.CALENDARIO,
                 itemTela("Agendamento", new Screen_Scheduling()),
                 itemTela("Caixa", new Tela_Caixa())));
