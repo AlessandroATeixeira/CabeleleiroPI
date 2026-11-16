@@ -1,7 +1,6 @@
 package Pck_Persistence;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
+import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -15,38 +14,33 @@ public class Persistence_Service {
     private final Conexao conexao = new Conexao();
 
     public void inserir(Model_Service servico) throws SQLException {
-        String sql = "INSERT INTO servicos (nm_servico) VALUES (?)";
-        try (Connection conn = conexao.getConexao(LOGIN, SENHA);
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, servico.getNomeServico());
-            stmt.executeUpdate();
+        try (CallableStatement call = conexao.getConexao(LOGIN, SENHA)
+                .prepareCall("{CALL proc_ins_servico(?, ?)}")) {
+            call.setString(1, servico.getNomeServico());
+            call.setBigDecimal(2, java.math.BigDecimal.valueOf(servico.getValorServico()));
+            call.execute();
         } finally {
             conexao.desconectar();
         }
     }
 
     public void atualizar(Model_Service servico) throws SQLException {
-        String sql = "UPDATE servicos SET nm_servico = ? WHERE id_servico = ?";
-        try (Connection conn = conexao.getConexao(LOGIN, SENHA);
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, servico.getNomeServico());
-            stmt.setInt(2, servico.getIdServico());
-            if (stmt.executeUpdate() == 0) {
-                throw new SQLException("Serviço não encontrado.");
-            }
+        try (CallableStatement call = conexao.getConexao(LOGIN, SENHA)
+                .prepareCall("{CALL proc_upd_servico(?, ?, ?)}")) {
+            call.setInt(1, servico.getIdServico());
+            call.setString(2, servico.getNomeServico());
+            call.setBigDecimal(3, java.math.BigDecimal.valueOf(servico.getValorServico()));
+            call.execute();
         } finally {
             conexao.desconectar();
         }
     }
 
     public void excluir(int id) throws SQLException {
-        String sql = "DELETE FROM servicos WHERE id_servico = ?";
-        try (Connection conn = conexao.getConexao(LOGIN, SENHA);
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, id);
-            if (stmt.executeUpdate() == 0) {
-                throw new SQLException("Serviço não encontrado.");
-            }
+        try (CallableStatement call = conexao.getConexao(LOGIN, SENHA)
+                .prepareCall("{CALL proc_del_servico(?)}")) {
+            call.setInt(1, id);
+            call.execute();
         } finally {
             conexao.desconectar();
         }
@@ -54,14 +48,14 @@ public class Persistence_Service {
 
     public ArrayList<Model_Service> listar() throws SQLException {
         ArrayList<Model_Service> lista = new ArrayList<>();
-        String sql = "SELECT id_servico, nm_servico FROM servicos ORDER BY id_servico";
-        try (Connection conn = conexao.getConexao(LOGIN, SENHA);
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+        try (CallableStatement call = conexao.getConexao(LOGIN, SENHA)
+                .prepareCall("{CALL proc_selc_servico()}");
+             ResultSet rs = call.executeQuery()) {
             while (rs.next()) {
                 Model_Service servico = new Model_Service();
                 servico.setIdServico(rs.getInt("id_servico"));
                 servico.setNomeServico(rs.getString("nm_servico"));
+                servico.setValorServico(rs.getDouble("vl_valor"));
                 lista.add(servico);
             }
         } finally {
