@@ -78,6 +78,7 @@ public class Tela_Caixa extends Tela_Base {
         cbServico = Tema.combo();
         txtQuantidade = new Tema.Campo("1");
         txtValor = new Tema.Campo("0,00");
+        txtValor.setEditable(false); // O valor vem do cadastro do produto/serviço conforme o tipo da movimentação.
         txtDescricao = new Tema.Campo("Opcional para produto");
 
         lblValor = Tema.rotulo("Valor unitário (R$)");
