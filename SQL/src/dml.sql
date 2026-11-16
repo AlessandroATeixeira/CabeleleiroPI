@@ -157,10 +157,10 @@ END$$
 -- PROCEDURES: Servico
 -- =========================================================
 
-DROP PROCEDURE IF EXISTS proc_ins_servico$
-DROP PROCEDURE IF EXISTS proc_upd_servico$
-DROP PROCEDURE IF EXISTS proc_del_servico$
-DROP PROCEDURE IF EXISTS proc_selc_servico$
+DROP PROCEDURE IF EXISTS proc_ins_servico$$
+DROP PROCEDURE IF EXISTS proc_upd_servico$$
+DROP PROCEDURE IF EXISTS proc_del_servico$$
+DROP PROCEDURE IF EXISTS proc_selc_servico$$
 
 CREATE PROCEDURE proc_ins_servico(
     IN p_nome VARCHAR(100),
