@@ -19,9 +19,11 @@ import javax.swing.table.DefaultTableModel;
 
 import Pck_Control.Control_Caixa;
 import Pck_Control.Control_Product;
+import Pck_Control.Control_Service;
 import Pck_Control.Control_Valor;
 import Pck_Model.Model_Caixa;
 import Pck_Model.Model_Product;
+import Pck_Model.Model_Service;
 
 /**
  * Caixa integrado ao estoque:
@@ -35,6 +37,7 @@ public class Tela_Caixa extends Tela_Base {
     private JComboBox<String> comboTipo;
     private JComboBox<String> cbOrigem;
     private JComboBox<String> cbProduto;
+    private JComboBox<String> cbServico;
     private Tema.Campo txtQuantidade;
     private Tema.Campo txtValor;
     private Tema.Campo txtDescricao;
@@ -50,10 +53,13 @@ public class Tela_Caixa extends Tela_Base {
     private DefaultTableModel modelo;
 
     private final List<Model_Product> produtos = new ArrayList<>();
+    private final List<Model_Service> servicos = new ArrayList<>();
     private boolean atualizandoProdutos = false;
+    private boolean atualizandoServicos = false;
 
     private final Control_Caixa control = new Control_Caixa();
     private final Control_Product controlProduto = new Control_Product();
+    private final Control_Service controlServico = new Control_Service();
 
     private static final DateTimeFormatter FORMATO = DateTimeFormatter.ofPattern("dd/MM/uuuu HH:mm");
 
@@ -69,6 +75,7 @@ public class Tela_Caixa extends Tela_Base {
         comboTipo = Tema.combo("ENTRADA", "SAÍDA");
         cbOrigem = Tema.combo("Produto", "Serviço");
         cbProduto = Tema.combo();
+        cbServico = Tema.combo();
         txtQuantidade = new Tema.Campo("1");
         txtValor = new Tema.Campo("0,00");
         txtDescricao = new Tema.Campo("Opcional para produto");
@@ -85,7 +92,8 @@ public class Tela_Caixa extends Tela_Base {
         JPanel linha1 = linhaCampos(new double[]{1, 1, 3},
                 Tema.campoComRotulo("Tipo", comboTipo),
                 Tema.campoComRotulo("Origem", cbOrigem),
-                Tema.campoComRotulo("Produto / Servico ", cbProduto));
+                Tema.campoComRotulo("Produto", cbProduto),
+                Tema.campoComRotulo("Serviço", cbServico));
         JPanel linha2 = linhaCampos(new double[]{1, 1, 3},
                 Tema.campoComRotulo("Quantidade", txtQuantidade),
                 campoComRotulo(lblValor, txtValor),
@@ -157,6 +165,9 @@ public class Tela_Caixa extends Tela_Base {
 
         comboTipo.addActionListener(e -> atualizarModo());
         cbOrigem.addActionListener(e -> atualizarModo());
+        cbServico.addActionListener(e -> {
+            if (!atualizandoServicos) preencherValorDoServico();
+        });
         cbProduto.addActionListener(e -> {
             if (!atualizandoProdutos) {
                 preencherValorDoProduto();
@@ -175,6 +186,7 @@ public class Tela_Caixa extends Tela_Base {
     @Override
     public void aoExibir() {
         carregarProdutos();
+        carregarServicos();
         carregarMovimentos();
     }
 
@@ -192,6 +204,7 @@ public class Tela_Caixa extends Tela_Base {
     private void atualizarModo() {
         boolean produto = origemProduto();
         cbProduto.setEnabled(produto);
+        cbServico.setEnabled(!produto);
         txtQuantidade.setEnabled(produto);
         lblValor.setText(produto ? "Valor unitário (R$)" : "Valor (R$)");
         txtDescricao.setToolTipText(produto ? "Se ficar em branco, a descrição é gerada automaticamente." : null);
@@ -204,6 +217,7 @@ public class Tela_Caixa extends Tela_Base {
                 preencherValorDoProduto();
             }
         } else {
+            preencherValorDoServico();
             lblDica.setText(entrada()
                     ? "Receita de serviço: soma ao saldo do caixa."
                     : "Despesa: reduz o saldo do caixa.");
@@ -214,6 +228,18 @@ public class Tela_Caixa extends Tela_Base {
     private Model_Product produtoSelecionado() {
         int i = cbProduto.getSelectedIndex();
         return (i >= 0 && i < produtos.size()) ? produtos.get(i) : null;
+    }
+
+    private Model_Service servicoSelecionado() {
+        int i = cbServico.getSelectedIndex();
+        return (i >= 0 && i < servicos.size()) ? servicos.get(i) : null;
+    }
+
+    private void preencherValorDoServico() {
+        Model_Service s = servicoSelecionado();
+        if (!origemProduto() && s != null) {
+            txtValor.setText(String.format("%.2f", s.getValorServico()).replace('.', ','));
+        }
     }
 
     private void preencherValorDoProduto() {
@@ -251,6 +277,7 @@ public class Tela_Caixa extends Tela_Base {
         if (cbProduto.getItemCount() > 0) {
             cbProduto.setSelectedIndex(0);
         }
+        if (cbServico.getItemCount() > 0) cbServico.setSelectedIndex(0);
         atualizarModo();
         tabela.clearSelection();
     }
@@ -262,14 +289,19 @@ public class Tela_Caixa extends Tela_Base {
         try {
             boolean produto = origemProduto();
             Model_Product p = produtoSelecionado();
+            Model_Service s = servicoSelecionado();
+            if (!produto && s == null) {
+                mostrarInfo("Cadastre e selecione um serviço antes de registrar uma movimentação de serviço.");
+                return;
+            }
             if (produto && p == null) {
                 mostrarInfo("Cadastre e selecione um produto antes de registrar uma movimentação de produto.");
                 return;
             }
 
             String descricao = txtDescricao.getText().trim();
-            if (descricao.isEmpty() && produto) {
-                descricao = (entrada() ? "Venda: " : "Compra: ") + p.getNome();
+            if (descricao.isEmpty()) {
+                descricao = produto ? (entrada() ? "Venda: " : "Compra: ") + p.getNome() : "Serviço: " + s.getNomeServico();
             }
 
             double unit = Control_Valor.parse(txtValor.getText());
@@ -280,6 +312,7 @@ public class Tela_Caixa extends Tela_Base {
                     entrada() ? "ENTRADA" : "SAIDA",
                     produto ? "PRODUTO" : "SERVICO",
                     produto ? p.getCodigo() : null,
+                    produto ? null : s.getIdServico(),
                     produto ? txtQuantidade.getText() : null,
                     descricao,
                     total);
@@ -289,6 +322,7 @@ public class Tela_Caixa extends Tela_Base {
                     : "Movimentação registrada com sucesso.");
             limparCampos();
             carregarProdutos();   // estoque novo aparece na lista de produtos
+            carregarServicos();
             carregarMovimentos();
         } catch (Exception e) {
             mostrarErro(e);
@@ -324,6 +358,30 @@ public class Tela_Caixa extends Tela_Base {
             atualizarModo();
         } catch (Exception e) {
             atualizandoProdutos = false;
+            mostrarErro(e);
+        }
+    }
+
+    private void carregarServicos() {
+        try {
+            Integer atual = servicoSelecionado() == null ? null : servicoSelecionado().getIdServico();
+            ArrayList<Model_Service> lista = controlServico.consultar();
+            atualizandoServicos = true;
+            servicos.clear();
+            servicos.addAll(lista);
+            cbServico.removeAllItems();
+            int indice = 0;
+            for (int i = 0; i < lista.size(); i++) {
+                Model_Service s = lista.get(i);
+                cbServico.addItem(s.getIdServico() + " - " + s.getNomeServico() + " (" + Tema.moeda(s.getValorServico()) + ")");
+                if (atual != null && atual == s.getIdServico()) indice = i;
+            }
+            if (lista.isEmpty()) cbServico.addItem("Nenhum serviço cadastrado");
+            else cbServico.setSelectedIndex(indice);
+            atualizandoServicos = false;
+            if (!origemProduto()) preencherValorDoServico();
+        } catch (Exception e) {
+            atualizandoServicos = false;
             mostrarErro(e);
         }
     }
