@@ -63,7 +63,7 @@ CREATE TABLE agendamento (
                              horario TIME NOT NULL
 );
 
-drop table servicos;
+DROP TABLE IF EXISTS servicos;
 
 create table servicos(
                          id_servico	int primary key auto_increment,
@@ -158,10 +158,10 @@ END$$
 -- PROCEDURES: Servico
 -- =========================================================
 
-DROP PROCEDURE IF EXISTS proc_ins_servico;
-DROP PROCEDURE IF EXISTS proc_upd_servico;
-DROP PROCEDURE IF EXISTS proc_del_servico;
-DROP PROCEDURE IF EXISTS proc_selc_servico;
+DROP PROCEDURE IF EXISTS proc_ins_servico$
+DROP PROCEDURE IF EXISTS proc_upd_servico$
+DROP PROCEDURE IF EXISTS proc_del_servico$
+DROP PROCEDURE IF EXISTS proc_selc_servico$
 
 CREATE PROCEDURE proc_ins_servico(
     IN p_nome VARCHAR(100),
