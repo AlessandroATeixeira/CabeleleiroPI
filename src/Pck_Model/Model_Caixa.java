@@ -9,6 +9,8 @@ public class Model_Caixa {
     private String tipo;
     private String origem;
     private Integer codProduto;
+    private Integer codServico;
+    private String nomeServico;
     private String nomeProduto;
     private Integer quantidade;
     private String descricao;
@@ -29,6 +31,12 @@ public class Model_Caixa {
 
     public Integer getCodProduto() { return codProduto; }
     public void setCodProduto(Integer codProduto) { this.codProduto = codProduto; }
+
+    public Integer getCodServico() { return codServico; }
+    public void setCodServico(Integer codServico) { this.codServico = codServico; }
+
+    public String getNomeServico() { return nomeServico; }
+    public void setNomeServico(String nomeServico) { this.nomeServico = nomeServico; }
 
     public String getNomeProduto() { return nomeProduto; }
     public void setNomeProduto(String nomeProduto) { this.nomeProduto = nomeProduto; }
