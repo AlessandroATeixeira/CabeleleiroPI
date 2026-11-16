@@ -63,9 +63,12 @@ CREATE TABLE agendamento (
                              horario TIME NOT NULL
 );
 
+drop table servicos;
+
 create table servicos(
                          id_servico	int primary key auto_increment,
-                         nm_servico	varchar(100)
+                         nm_servico	varchar(100),
+                         vl_valor	decimal(10,2)
 
 );
 
@@ -154,30 +157,34 @@ END$$
 -- =========================================================
 -- PROCEDURES: Servico
 -- =========================================================
-drop procedure proc_ins_servico;
+
 create procedure proc_ins_servico(
-    IN p_nome VARCHAR(100)
+    IN p_nome VARCHAR(100),
+    IN p_valor DECIMAL(10,2)
 )
 begin
-IF p_id IS NULL OR p_id <= 0 THEN
+
+IF p_valor IS NULL OR p_valor <= 0 THEN
 SIGNAL SQLSTATE '45000'
-SET MESSAGE_TEXT = 'O codigo do servico deve ser maior que zero';
+SET MESSAGE_TEXT = 'O valor do servico deve ser maior que zero';
 END IF;
+
 
 IF p_nome IS NULL OR TRIM(p_nome) = '' THEN
 SIGNAL SQLSTATE '45000'
 SET MESSAGE_TEXT = 'O nome do servico e obrigatorio';
 END IF;
 
-INSERT INTO servicos (nome_prod)
-VALUES (p_nome = nome_prod);
+INSERT INTO servicos (nm_nome, vl_valor)
+VALUES (TRIM(p_nome), p_valor);
 END$$
 
 
-
+drop procedure proc_upd_servico;
 create procedure proc_upd_servico(
     IN p_id	INT,
-    IN p_nome VARCHAR(100)
+    IN p_nome VARCHAR(100),
+    IN p_valor DECIMAL(10,2)
 )
 begin
 IF p_id IS NULL OR p_id <= 0 THEN
@@ -191,7 +198,7 @@ SET MESSAGE_TEXT = 'O nome do servico e obrigatorio';
 END IF;
 
 UPDATE servicos
-SET p_nome = TRIM(p_nome)
+SET nm_nome = TRIM(p_nome), vl_valor = p_valor
 WHERE id_servico = p_id;
 END$$
 
