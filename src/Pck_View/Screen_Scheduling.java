@@ -20,7 +20,7 @@ import Pck_Model.Model_Service;
 
 public class Screen_Scheduling extends Tela_Base {
     private Tema.Campo txtCodigo, txtCodCliente, txtData, txtHorario;
-    private JComboBox<Model_Service> cbServico;
+    private JComboBox<String> cbServico;
     private Tema.Botao btnAgendar, btnAtualizar, btnExcluir, btnConsultar, btnLimpar;
     private JTable tabela;
     private DefaultTableModel modelo;
@@ -43,7 +43,7 @@ public class Screen_Scheduling extends Tela_Base {
         txtCodCliente = new Tema.Campo("Ex.: 1");
         txtData = new Tema.Campo("dd/mm/aaaa");
         txtHorario = new Tema.Campo("HH:mm");
-        cbServico = new JComboBox<>();
+        cbServico = Tema.combo();
 
         btnAgendar = new Tema.Botao("Agendar", Tema.TipoBotao.PRIMARIO);
         btnAtualizar = new Tema.Botao("Atualizar", Tema.TipoBotao.SECUNDARIO);
@@ -109,9 +109,8 @@ public class Screen_Scheduling extends Tela_Base {
             cbServico.removeAllItems();
             int indice = 0;
             for (int i=0; i<lista.size(); i++) {
-                Model_Service s = lista.get(i);
+                String s = String.valueOf(lista.get(i));
                 cbServico.addItem(s);
-                if (idAtual != null && idAtual == s.getIdServico()) indice = i;
             }
             if (!lista.isEmpty()) cbServico.setSelectedIndex(indice);
             carregandoServicos = false;

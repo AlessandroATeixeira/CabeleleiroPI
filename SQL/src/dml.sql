@@ -53,21 +53,21 @@ CREATE TABLE item (
 );
 
 CREATE TABLE servicos (
-    id_servico INT PRIMARY KEY AUTO_INCREMENT,
-    nm_servico VARCHAR(100) NOT NULL,
-    vl_valor DECIMAL(10,2) NOT NULL
+                          id_servico INT PRIMARY KEY AUTO_INCREMENT,
+                          nm_servico VARCHAR(100) NOT NULL,
+                          vl_valor DECIMAL(10,2) NOT NULL
 );
 
 CREATE TABLE agendamento (
-    cod_agendamento INT PRIMARY KEY,
-    cod_cliente INT NOT NULL,
-    id_servico INT NOT NULL,
-    data_agendamento DATE NOT NULL,
-    horario TIME NOT NULL,
-    CONSTRAINT fk_agendamento_cliente
-        FOREIGN KEY (cod_cliente) REFERENCES cliente(cod_cliente),
-    CONSTRAINT fk_agendamento_servico
-        FOREIGN KEY (id_servico) REFERENCES servicos(id_servico)
+                             cod_agendamento INT PRIMARY KEY,
+                             cod_cliente INT NOT NULL,
+                             id_servico INT NOT NULL,
+                             data_agendamento DATE NOT NULL,
+                             horario TIME NOT NULL,
+                             CONSTRAINT fk_agendamento_cliente
+                                 FOREIGN KEY (cod_cliente) REFERENCES cliente(cod_cliente),
+                             CONSTRAINT fk_agendamento_servico
+                                 FOREIGN KEY (id_servico) REFERENCES servicos(id_servico)
 );
 
 -- =========================================================
@@ -156,11 +156,6 @@ END$$
 -- PROCEDURES: Servico
 -- =========================================================
 
-DROP PROCEDURE IF EXISTS proc_ins_servico$$
-DROP PROCEDURE IF EXISTS proc_upd_servico$$
-DROP PROCEDURE IF EXISTS proc_del_servico$$
-DROP PROCEDURE IF EXISTS proc_selc_servico$$
-
 CREATE PROCEDURE proc_ins_servico(
     IN p_nome VARCHAR(100),
     IN p_valor DECIMAL(10,2)
@@ -168,12 +163,12 @@ CREATE PROCEDURE proc_ins_servico(
 BEGIN
     IF p_nome IS NULL OR TRIM(p_nome) = '' THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'O nome do servico e obrigatorio';
-    END IF;
+END IF;
     IF p_valor IS NULL OR p_valor <= 0 THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'O valor do servico deve ser maior que zero';
-    END IF;
-    INSERT INTO servicos (nm_servico, vl_valor)
-    VALUES (TRIM(p_nome), p_valor);
+END IF;
+INSERT INTO servicos (nm_servico, vl_valor)
+VALUES (TRIM(p_nome), p_valor);
 END$$
 
 CREATE PROCEDURE proc_upd_servico(
@@ -184,37 +179,37 @@ CREATE PROCEDURE proc_upd_servico(
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM servicos WHERE id_servico = p_id) THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Servico nao encontrado';
-    END IF;
+END IF;
     IF p_nome IS NULL OR TRIM(p_nome) = '' THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'O nome do servico e obrigatorio';
-    END IF;
+END IF;
     IF p_valor IS NULL OR p_valor <= 0 THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'O valor do servico deve ser maior que zero';
-    END IF;
-    UPDATE servicos
-       SET nm_servico = TRIM(p_nome), vl_valor = p_valor
-     WHERE id_servico = p_id;
+END IF;
+UPDATE servicos
+SET nm_servico = TRIM(p_nome), vl_valor = p_valor
+WHERE id_servico = p_id;
 END$$
 
 CREATE PROCEDURE proc_del_servico(IN p_id INT)
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM servicos WHERE id_servico = p_id) THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Servico nao encontrado';
-    END IF;
+END IF;
     IF EXISTS (SELECT 1 FROM caixa WHERE id_servico = p_id) THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Servico possui movimentacoes de caixa';
-    END IF;
+END IF;
     IF EXISTS (SELECT 1 FROM agendamento WHERE id_servico = p_id) THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Servico possui agendamentos associados';
-    END IF;
-    DELETE FROM servicos WHERE id_servico = p_id;
+END IF;
+DELETE FROM servicos WHERE id_servico = p_id;
 END$$
 
 CREATE PROCEDURE proc_selc_servico()
 BEGIN
-    SELECT id_servico, nm_servico, vl_valor
-      FROM servicos
-     ORDER BY id_servico;
+SELECT id_servico, nm_servico, vl_valor
+FROM servicos
+ORDER BY id_servico;
 END$$
 
 -- =========================================================
@@ -287,6 +282,11 @@ END IF;
 IF EXISTS (SELECT 1 FROM item WHERE cod_produto = p_cod) THEN
 SIGNAL SQLSTATE '45000'
 SET MESSAGE_TEXT = 'Produto possui itens associados';
+END IF;
+
+IF EXISTS (SELECT 1 FROM caixa WHERE cod_produto = p_cod) THEN
+SIGNAL SQLSTATE '45000'
+SET MESSAGE_TEXT = 'Produto possui movimentacoes de caixa';
 END IF;
 
 DELETE FROM produto WHERE cod_produto = p_cod;
@@ -459,9 +459,7 @@ END$$
 -- PROCEDURES: AGENDAMENTO
 -- =========================================================
 
-DROP PROCEDURE IF EXISTS proc_ins_agendamento$
-DROP PROCEDURE IF EXISTS proc_selc_agendamentos$
-DROP PROCEDURE IF EXISTS proc_upd_agendamento$
+
 
 CREATE PROCEDURE proc_ins_agendamento(
     IN p_cod INT,
@@ -473,28 +471,28 @@ CREATE PROCEDURE proc_ins_agendamento(
 BEGIN
     IF p_cod IS NULL OR p_cod <= 0 THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'O codigo do agendamento deve ser maior que zero';
-    END IF;
+END IF;
     IF p_cliente IS NULL OR NOT EXISTS (SELECT 1 FROM cliente WHERE cod_cliente = p_cliente) THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Cliente nao encontrado';
-    END IF;
+END IF;
     IF p_id_servico IS NULL OR NOT EXISTS (SELECT 1 FROM servicos WHERE id_servico = p_id_servico) THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Selecione um servico cadastrado';
-    END IF;
+END IF;
     IF p_data IS NULL OR p_horario IS NULL THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Data e horario sao obrigatorios';
-    END IF;
-    INSERT INTO agendamento (cod_agendamento, cod_cliente, id_servico, data_agendamento, horario)
-    VALUES (p_cod, p_cliente, p_id_servico, p_data, p_horario);
-END$
+END IF;
+INSERT INTO agendamento (cod_agendamento, cod_cliente, id_servico, data_agendamento, horario)
+VALUES (p_cod, p_cliente, p_id_servico, p_data, p_horario);
+END$$
 
 CREATE PROCEDURE proc_selc_agendamentos()
 BEGIN
-    SELECT a.cod_agendamento, a.cod_cliente, a.id_servico,
-           s.nm_servico AS servico, a.data_agendamento, a.horario
-    FROM agendamento a
-    INNER JOIN servicos s ON s.id_servico = a.id_servico
-    ORDER BY a.data_agendamento, a.horario;
-END$
+SELECT a.cod_agendamento, a.cod_cliente, a.id_servico,
+       s.nm_servico AS servico, a.data_agendamento, a.horario
+FROM agendamento a
+         INNER JOIN servicos s ON s.id_servico = a.id_servico
+ORDER BY a.data_agendamento, a.horario;
+END$$
 
 CREATE PROCEDURE proc_upd_agendamento(
     IN p_cod INT,
@@ -506,21 +504,21 @@ CREATE PROCEDURE proc_upd_agendamento(
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM agendamento WHERE cod_agendamento = p_cod) THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Agendamento nao encontrado';
-    END IF;
+END IF;
     IF p_cliente IS NULL OR NOT EXISTS (SELECT 1 FROM cliente WHERE cod_cliente = p_cliente) THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Cliente nao encontrado';
-    END IF;
+END IF;
     IF p_id_servico IS NULL OR NOT EXISTS (SELECT 1 FROM servicos WHERE id_servico = p_id_servico) THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Selecione um servico cadastrado';
-    END IF;
+END IF;
     IF p_data IS NULL OR p_horario IS NULL THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Data e horario sao obrigatorios';
-    END IF;
-    UPDATE agendamento
-    SET cod_cliente = p_cliente, id_servico = p_id_servico,
-        data_agendamento = p_data, horario = p_horario
-    WHERE cod_agendamento = p_cod;
-END$
+END IF;
+UPDATE agendamento
+SET cod_cliente = p_cliente, id_servico = p_id_servico,
+    data_agendamento = p_data, horario = p_horario
+WHERE cod_agendamento = p_cod;
+END$$
 
 
 CREATE PROCEDURE proc_del_agendamento(IN p_cod INT)
@@ -559,30 +557,6 @@ CREATE TABLE IF NOT EXISTS caixa (
     );
 
 DELIMITER $$
-
-DROP PROCEDURE IF EXISTS proc_ins_caixa$$
-DROP PROCEDURE IF EXISTS proc_selc_caixa$$
-DROP PROCEDURE IF EXISTS proc_del_produto$$
-
-CREATE PROCEDURE proc_del_produto(IN p_cod INT)
-BEGIN
-IF NOT EXISTS (SELECT 1 FROM produto WHERE cod_produto = p_cod) THEN
-SIGNAL SQLSTATE '45000'
-SET MESSAGE_TEXT = 'Produto nao encontrado';
-END IF;
-
-IF EXISTS (SELECT 1 FROM item WHERE cod_produto = p_cod) THEN
-SIGNAL SQLSTATE '45000'
-SET MESSAGE_TEXT = 'Produto possui itens associados';
-END IF;
-
-IF EXISTS (SELECT 1 FROM caixa WHERE cod_produto = p_cod) THEN
-SIGNAL SQLSTATE '45000'
-SET MESSAGE_TEXT = 'Produto possui movimentacoes de caixa';
-END IF;
-
-DELETE FROM produto WHERE cod_produto = p_cod;
-END$$
 
 -- =========================================================
 -- PROCEDURES: CAIXA
@@ -659,18 +633,18 @@ END IF;
 IF p_origem = 'SERVICO' THEN
     IF p_id_servico IS NULL OR NOT EXISTS (SELECT 1 FROM servicos WHERE id_servico = p_id_servico) THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Selecione um servico cadastrado';
-    END IF;
+END IF;
     IF p_cod_produto IS NOT NULL OR p_quantidade IS NOT NULL THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Servico nao utiliza produto ou quantidade';
-    END IF;
+END IF;
 END IF;
 
 IF p_origem = 'PRODUTO' THEN
     SET v_valor_total = v_valor_unitario * p_quantidade;
 ELSE
-    SELECT vl_valor INTO v_valor_unitario
-    FROM servicos WHERE id_servico = p_id_servico;
-    SET v_valor_total = v_valor_unitario;
+SELECT vl_valor INTO v_valor_unitario
+FROM servicos WHERE id_servico = p_id_servico;
+SET v_valor_total = v_valor_unitario;
 END IF;
 
 IF v_valor_total IS NULL OR v_valor_total <= 0 THEN
