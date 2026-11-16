@@ -89,7 +89,7 @@ public class Tela_Caixa extends Tela_Base {
         btnRegistrar = new Tema.Botao("Registrar movimentação", Tema.TipoBotao.PRIMARIO);
         btnLimpar = new Tema.Botao("Limpar", Tema.TipoBotao.NEUTRO);
 
-        JPanel linha1 = linhaCampos(new double[]{1, 1, 3},
+        JPanel linha1 = linhaCampos(new double[]{1, 1, 2, 2},
                 Tema.campoComRotulo("Tipo", comboTipo),
                 Tema.campoComRotulo("Origem", cbOrigem),
                 Tema.campoComRotulo("Produto", cbProduto),
