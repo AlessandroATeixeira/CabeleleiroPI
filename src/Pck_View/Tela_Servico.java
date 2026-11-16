@@ -14,6 +14,7 @@ import Pck_Model.Model_Service;
 public class Tela_Servico extends Tela_Base {
     private Tema.Campo txtCodigo;
     private Tema.Campo txtNome;
+    private Tema.Campo txtValor;
     private Tema.Botao btnInserir;
     private Tema.Botao btnAlterar;
     private Tema.Botao btnExcluir;
@@ -34,6 +35,7 @@ public class Tela_Servico extends Tela_Base {
         txtCodigo = new Tema.Campo("Gerado automaticamente");
         txtCodigo.setEditable(false);
         txtNome = new Tema.Campo("Ex.: Corte feminino");
+        txtValor = new Tema.Campo("Ex.: 50,00");
 
         btnInserir = new Tema.Botao("Inserir", Tema.TipoBotao.PRIMARIO);
         btnAlterar = new Tema.Botao("Alterar", Tema.TipoBotao.SECUNDARIO);
@@ -44,13 +46,14 @@ public class Tela_Servico extends Tela_Base {
         Tema.Cartao formulario = cartaoComTitulo("Dados do serviço", null);
         JPanel corpo = new JPanel(new BorderLayout(0, 18));
         corpo.setOpaque(false);
-        corpo.add(linhaCampos(new double[]{1, 3},
+        corpo.add(linhaCampos(new double[]{1, 3, 1},
                 Tema.campoComRotulo("Código", txtCodigo),
-                Tema.campoComRotulo("Nome do serviço", txtNome)), BorderLayout.NORTH);
+                Tema.campoComRotulo("Nome do serviço", txtNome),
+                Tema.campoComRotulo("Valor (R$)", txtValor)), BorderLayout.NORTH);
         corpo.add(linhaBotoes(btnInserir, btnAlterar, btnExcluir, btnConsultar, btnLimpar), BorderLayout.SOUTH);
         formulario.add(corpo, BorderLayout.CENTER);
 
-        modelo = new DefaultTableModel(new Object[]{"Código", "Serviço"}, 0) {
+        modelo = new DefaultTableModel(new Object[]{"Código", "Serviço", "Valor (R$)"}, 0) {
             @Override public boolean isCellEditable(int linha, int coluna) { return false; }
         };
         tabela = new JTable(modelo);
@@ -84,12 +87,13 @@ public class Tela_Servico extends Tela_Base {
         if (linha >= 0) {
             txtCodigo.setText(String.valueOf(modelo.getValueAt(linha, 0)));
             txtNome.setText(String.valueOf(modelo.getValueAt(linha, 1)));
+            txtValor.setText(String.valueOf(modelo.getValueAt(linha, 2)).replace("R$", "").trim());
         }
     }
 
     private void inserir() {
         try {
-            control.inserir(txtNome.getText());
+            control.inserir(txtNome.getText(), txtValor.getText());
             mostrarInfo("Serviço cadastrado com sucesso.");
             limparCampos();
             carregarTabela();
@@ -102,7 +106,7 @@ public class Tela_Servico extends Tela_Base {
                 mostrarInfo("Selecione um serviço na tabela para alterar.");
                 return;
             }
-            control.atualizar(txtCodigo.getText(), txtNome.getText());
+            control.atualizar(txtCodigo.getText(), txtNome.getText(), txtValor.getText());
             mostrarInfo("Serviço atualizado com sucesso.");
             limparCampos();
             carregarTabela();
@@ -128,7 +132,8 @@ public class Tela_Servico extends Tela_Base {
             ArrayList<Model_Service> lista = control.consultar();
             modelo.setRowCount(0);
             for (Model_Service servico : lista) {
-                modelo.addRow(new Object[]{servico.getIdServico(), servico.getNomeServico()});
+                modelo.addRow(new Object[]{servico.getIdServico(), servico.getNomeServico(),
+                        String.format("%.2f", servico.getValorServico())});
             }
             lblTotal.setText(lista.size() + (lista.size() == 1 ? " serviço" : " serviços"));
         } catch (Exception e) { mostrarErro(e); }
@@ -137,6 +142,7 @@ public class Tela_Servico extends Tela_Base {
     private void limparCampos() {
         txtCodigo.setText("");
         txtNome.setText("");
+        txtValor.setText("");
         tabela.clearSelection();
         txtNome.requestFocusInWindow();
     }
