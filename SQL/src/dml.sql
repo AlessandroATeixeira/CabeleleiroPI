@@ -541,6 +541,9 @@ END IF;
 DELETE FROM agendamento WHERE cod_agendamento = p_cod;
 END$$
 
+DELIMITER ;
+
+
 
 
 CREATE TABLE IF NOT EXISTS caixa (
