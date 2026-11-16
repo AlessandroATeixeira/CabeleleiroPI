@@ -24,13 +24,18 @@ public class Control_Caixa {
      *
      * @param valorTotal valor total da movimentacao (quantidade x valor unitario, no caso de produto)
      */
-    public void Registrar(String tipo, String origem, Integer codProduto, String quantidade,
+    public void Registrar(String tipo, String origem, Integer codProduto, Integer codServico, String quantidade,
                           String descricao, double valorTotal) throws Exception {
         Model_Caixa m = new Model_Caixa();
         m.setTipo(tipo);
         m.setOrigem(origem);
         m.setDescricao(descricao == null ? "" : descricao.trim());
         m.setValor(Math.round(valorTotal * 100) / 100.0);
+
+        if ("SERVICO".equals(origem)) {
+            if (codServico == null) throw new Exception("Selecione um serviço.");
+            m.setCodServico(codServico);
+        }
 
         if ("PRODUTO".equals(origem)) {
             if (codProduto == null) {
