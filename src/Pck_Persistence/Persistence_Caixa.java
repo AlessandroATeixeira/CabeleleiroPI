@@ -32,12 +32,12 @@ public class Persistence_Caixa {
                 oCall.setInt(3, m.getCodProduto());
             }
             if (m.getCodServico() == null) {
-                oCall.setNull(5, Types.INTEGER);
+                oCall.setNull(4, Types.INTEGER);
             } else {
                 oCall.setInt(4, m.getCodServico());
             }
             if (m.getQuantidade() == null) {
-                oCall.setNull(4, Types.INTEGER);
+                oCall.setNull(5, Types.INTEGER);
             } else {
                 oCall.setInt(5, m.getQuantidade());
             }
