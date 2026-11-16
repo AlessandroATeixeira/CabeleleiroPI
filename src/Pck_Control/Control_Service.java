@@ -34,7 +34,7 @@ public class Control_Service {
     private Model_Service criarServico(String nome, String valor) {
         double preco;
         try {
-            preco = Double.parseDouble(valor.trim().replace(".", "").replace(",", "."));
+            preco = Control_Valor.parse(valor);
         } catch (Exception e) {
             throw new IllegalArgumentException("Informe um valor válido para o serviço.");
         }
