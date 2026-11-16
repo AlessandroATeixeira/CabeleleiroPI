@@ -51,7 +51,6 @@ CREATE TABLE item (
                       CONSTRAINT fk_item_produto
                           FOREIGN KEY (cod_produto) REFERENCES produto(cod_produto)
 );
-drop table item;
 
 CREATE TABLE agendamento (
                              cod_agendamento INT PRIMARY KEY,
