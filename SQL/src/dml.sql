@@ -158,65 +158,62 @@ END$$
 -- PROCEDURES: Servico
 -- =========================================================
 
-create procedure proc_ins_servico(
+DROP PROCEDURE IF EXISTS proc_ins_servico;
+DROP PROCEDURE IF EXISTS proc_upd_servico;
+DROP PROCEDURE IF EXISTS proc_del_servico;
+DROP PROCEDURE IF EXISTS proc_selc_servico;
+
+CREATE PROCEDURE proc_ins_servico(
     IN p_nome VARCHAR(100),
     IN p_valor DECIMAL(10,2)
 )
-begin
-
-IF p_valor IS NULL OR p_valor <= 0 THEN
-SIGNAL SQLSTATE '45000'
-SET MESSAGE_TEXT = 'O valor do servico deve ser maior que zero';
-END IF;
-
-
-IF p_nome IS NULL OR TRIM(p_nome) = '' THEN
-SIGNAL SQLSTATE '45000'
-SET MESSAGE_TEXT = 'O nome do servico e obrigatorio';
-END IF;
-
-INSERT INTO servicos (nm_nome, vl_valor)
-VALUES (TRIM(p_nome), p_valor);
+BEGIN
+    IF p_nome IS NULL OR TRIM(p_nome) = '' THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'O nome do servico e obrigatorio';
+    END IF;
+    IF p_valor IS NULL OR p_valor <= 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'O valor do servico deve ser maior que zero';
+    END IF;
+    INSERT INTO servicos (nm_servico, vl_valor)
+    VALUES (TRIM(p_nome), p_valor);
 END$$
 
-
-drop procedure proc_upd_servico;
-create procedure proc_upd_servico(
-    IN p_id	INT,
+CREATE PROCEDURE proc_upd_servico(
+    IN p_id INT,
     IN p_nome VARCHAR(100),
     IN p_valor DECIMAL(10,2)
 )
-begin
-IF p_id IS NULL OR p_id <= 0 THEN
-SIGNAL SQLSTATE '45000'
-SET MESSAGE_TEXT = 'O codigo do servico deve ser maior que zero';
-END IF;
-
-IF p_nome IS NULL OR TRIM(p_nome) = '' THEN
-SIGNAL SQLSTATE '45000'
-SET MESSAGE_TEXT = 'O nome do servico e obrigatorio';
-END IF;
-
-UPDATE servicos
-SET nm_nome = TRIM(p_nome), vl_valor = p_valor
-WHERE id_servico = p_id;
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM servicos WHERE id_servico = p_id) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Servico nao encontrado';
+    END IF;
+    IF p_nome IS NULL OR TRIM(p_nome) = '' THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'O nome do servico e obrigatorio';
+    END IF;
+    IF p_valor IS NULL OR p_valor <= 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'O valor do servico deve ser maior que zero';
+    END IF;
+    UPDATE servicos
+       SET nm_servico = TRIM(p_nome), vl_valor = p_valor
+     WHERE id_servico = p_id;
 END$$
 
 CREATE PROCEDURE proc_del_servico(IN p_id INT)
 BEGIN
-IF NOT EXISTS (SELECT 1 FROM servico WHERE id_servico = p_id) THEN
-SIGNAL SQLSTATE '45000'
-SET MESSAGE_TEXT = 'servico nao encontrado';
-END IF;
-
-DELETE FROM servicos WHERE id_servico = p_id;
+    IF NOT EXISTS (SELECT 1 FROM servicos WHERE id_servico = p_id) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Servico nao encontrado';
+    END IF;
+    IF EXISTS (SELECT 1 FROM caixa WHERE id_servico = p_id) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Servico possui movimentacoes de caixa';
+    END IF;
+    DELETE FROM servicos WHERE id_servico = p_id;
 END$$
 
 CREATE PROCEDURE proc_selc_servico()
 BEGIN
-SELECT *
-FROM servicos
-ORDER BY id_servico;
+    SELECT id_servico, nm_servico, vl_valor
+      FROM servicos
+     ORDER BY id_servico;
 END$$
 
 -- =========================================================
@@ -553,6 +550,7 @@ CREATE TABLE IF NOT EXISTS caixa (
                                      tipo VARCHAR(7) NOT NULL,
     origem VARCHAR(10) NOT NULL,
     cod_produto INT NULL,
+    id_servico INT NULL,
     quantidade INT NULL,
     descricao VARCHAR(120) NOT NULL,
     valor DECIMAL(10,2) NOT NULL,
@@ -561,7 +559,9 @@ CREATE TABLE IF NOT EXISTS caixa (
     CONSTRAINT chk_caixa_valor CHECK (valor > 0),
     CONSTRAINT chk_caixa_qtd CHECK (quantidade IS NULL OR quantidade > 0),
     CONSTRAINT fk_caixa_produto
-    FOREIGN KEY (cod_produto) REFERENCES produto(cod_produto)
+    FOREIGN KEY (cod_produto) REFERENCES produto(cod_produto),
+    CONSTRAINT fk_caixa_servico
+    FOREIGN KEY (id_servico) REFERENCES servicos(id_servico)
     );
 
 DELIMITER $$
@@ -603,6 +603,7 @@ CREATE PROCEDURE proc_ins_caixa(
     IN p_tipo VARCHAR(7),
     IN p_origem VARCHAR(10),
     IN p_cod_produto INT,
+    IN p_id_servico INT,
     IN p_quantidade INT,
     IN p_descricao VARCHAR(120),
     IN p_valor DECIMAL(10,2)
@@ -640,6 +641,9 @@ END IF;
 START TRANSACTION;
 
 IF p_origem = 'PRODUTO' THEN
+IF p_id_servico IS NOT NULL THEN
+SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Informe somente produto para origem PRODUTO';
+END IF;
 IF p_quantidade IS NULL OR p_quantidade <= 0 THEN
 SIGNAL SQLSTATE '45000'
 SET MESSAGE_TEXT = 'A quantidade deve ser maior que zero';
@@ -659,6 +663,15 @@ SET MESSAGE_TEXT = 'Estoque insuficiente para a venda';
 END IF;
 END IF;
 
+IF p_origem = 'SERVICO' THEN
+    IF p_id_servico IS NULL OR NOT EXISTS (SELECT 1 FROM servicos WHERE id_servico = p_id_servico) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Selecione um servico cadastrado';
+    END IF;
+    IF p_cod_produto IS NOT NULL OR p_quantidade IS NOT NULL THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Servico nao utiliza produto ou quantidade';
+    END IF;
+END IF;
+
 IF p_tipo = 'SAIDA' THEN
 SELECT COALESCE(SUM(CASE WHEN tipo = 'ENTRADA' THEN valor ELSE -valor END), 0)
 INTO v_saldo FROM caixa;
@@ -676,11 +689,11 @@ SET estoque = CASE WHEN p_tipo = 'ENTRADA'
                    ELSE estoque + p_quantidade END
 WHERE cod_produto = p_cod_produto;
 
-INSERT INTO caixa (tipo, origem, cod_produto, quantidade, descricao, valor)
-VALUES (p_tipo, p_origem, p_cod_produto, p_quantidade, TRIM(p_descricao), p_valor);
+INSERT INTO caixa (tipo, origem, cod_produto, id_servico, quantidade, descricao, valor)
+VALUES (p_tipo, p_origem, p_cod_produto, NULL, p_quantidade, TRIM(p_descricao), p_valor);
 ELSE
-INSERT INTO caixa (tipo, origem, cod_produto, quantidade, descricao, valor)
-VALUES (p_tipo, p_origem, NULL, NULL, TRIM(p_descricao), p_valor);
+INSERT INTO caixa (tipo, origem, cod_produto, id_servico, quantidade, descricao, valor)
+VALUES (p_tipo, p_origem, NULL, p_id_servico, NULL, TRIM(p_descricao), p_valor);
 END IF;
 
 COMMIT;
@@ -689,9 +702,11 @@ END$$
 CREATE PROCEDURE proc_selc_caixa()
 BEGIN
 SELECT c.cod_mov, c.data_hora, c.tipo, c.origem,
-       c.cod_produto, p.nome_prod, c.quantidade, c.descricao, c.valor
+       c.cod_produto, p.nome_prod, c.id_servico, s.nm_servico,
+       c.quantidade, c.descricao, c.valor
 FROM caixa c
          LEFT JOIN produto p ON p.cod_produto = c.cod_produto
+         LEFT JOIN servicos s ON s.id_servico = c.id_servico
 ORDER BY c.data_hora DESC, c.cod_mov DESC;
 END$$
 
