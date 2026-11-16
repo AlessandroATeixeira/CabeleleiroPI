@@ -51,7 +51,7 @@ public class Model_Caixa {
     public void setValorB(double valorB) { this.valorB = valorB; }
 
     public double getValorV() { return valorV; }
-    public void setValor(double valorV) { this.valorV = valorV; }
+    public void setValor(double valor) { this.valorB = valor; this.valorV = valor; }
 
     public boolean isEntrada() { return "ENTRADA".equals(tipo); }
 
