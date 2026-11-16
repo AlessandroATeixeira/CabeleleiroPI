@@ -12,7 +12,8 @@ public class Model_Caixa {
     private String nomeProduto;
     private Integer quantidade;
     private String descricao;
-    private double valor;
+    private double valorB;
+    private double valorV;
 
     public int getCodigo() { return codigo; }
     public void setCodigo(int codigo) { this.codigo = codigo; }
@@ -38,8 +39,11 @@ public class Model_Caixa {
     public String getDescricao() { return descricao; }
     public void setDescricao(String descricao) { this.descricao = descricao; }
 
-    public double getValor() { return valor; }
-    public void setValor(double valor) { this.valor = valor; }
+    public double getValorB() { return valorB; }
+    public void setValorB(double valorB) { this.valorB = valorB; }
+
+    public double getValorV() { return valorV; }
+    public void setValor(double valorV) { this.valorV = valorV; }
 
     public boolean isEntrada() { return "ENTRADA".equals(tipo); }
 

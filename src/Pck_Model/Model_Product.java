@@ -4,7 +4,8 @@ public class Model_Product {
 
     private int codigo;
     private String nome;
-    private double valorProd;
+    private double valorProdB;
+    private double valorProdV;
     private int estoque;
 
 
@@ -22,11 +23,18 @@ public class Model_Product {
         this.nome = nome;
     }
 
-    public double getValorProd() {
-        return valorProd;
+    public double getValorProdB() {
+        return valorProdB;
     }
-    public void setValorProd(double valorProd) {
-        this.valorProd = valorProd;
+    public void setValorProdB(double valorProdB) {
+        this.valorProdB = valorProdB;
+    }
+
+    public double getValorProdV() {
+        return valorProdV;
+    }
+    public void setValorProdV(double valorProdV) {
+        this.valorProdV = valorProdV;
     }
 
     public int getEstoque() {

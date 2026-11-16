@@ -8,7 +8,7 @@ import java.util.ArrayList;
 public class Control_Product {
     Persistence_Product oPers = new Persistence_Product();
 
-    public void Inserir(String codigo, String nome, String valorProd, String estoque) throws Exception {
+    public void Inserir(String codigo, String nome, String valorProdB, String valorProdV, String estoque) throws Exception {
         int codigoInt = Integer.parseInt(codigo);
         if (codigoInt <= 0) {
             throw new Exception("O código do produto deve ser maior que zero.");
@@ -32,20 +32,26 @@ public class Control_Product {
             }
         }
 
-        double valorDouble = Double.parseDouble(valorProd.replace(",", "."));
-        if (valorDouble < 0) {
+        double valorBDouble = Double.parseDouble(valorProdB.replace(",", "."));
+        if (valorBDouble < 0) {
+            throw new Exception("O valor do produto não pode ser negativo.");
+        }
+
+        double valorVDouble = Double.parseDouble(valorProdV.replace(",", "."));
+        if (valorVDouble < 0) {
             throw new Exception("O valor do produto não pode ser negativo.");
         }
 
         Model_Product objProduct = new Model_Product();
         objProduct.setCodigo(codigoInt);
         objProduct.setNome(nome);
-        objProduct.setValorProd(valorDouble);
+        objProduct.setValorProdB(valorBDouble);
+        objProduct.setValorProdV(valorVDouble);
         objProduct.setEstoque(estoqueInt);
         oPers.PersInsProduct(objProduct);
     }
 
-    public void Atualizar(String codigo, String nome, String valorProd, String estoque) throws Exception {
+    public void Atualizar(String codigo, String nome, String valorProdB, String valorProdV, String estoque) throws Exception {
         int codigoInt = Integer.parseInt(codigo);
 
         if (codigoInt <= 0) {
@@ -57,15 +63,21 @@ public class Control_Product {
             throw new Exception("O estoque não pode ser negativo.");
         }
 
-        double valorDouble = Double.parseDouble(valorProd.replace(",", "."));
-        if (valorDouble < 0) {
-            throw new Exception("O valor do produto não pode ser negativo.");
+        double valorBDouble = Double.parseDouble(valorProdB.replace(",", "."));
+        if (valorBDouble < 0) {
+            throw new Exception("O valor bruto do produto não pode ser negativo.");
+        }
+
+        double valorVDouble = Double.parseDouble(valorProdV.replace(",", "."));
+        if (valorVDouble < 0) {
+            throw new Exception("O valor de venda do produto não pode ser negativo.");
         }
 
         Model_Product objProduct = new Model_Product();
         objProduct.setCodigo(codigoInt);
         objProduct.setNome(nome);
-        objProduct.setValorProd(valorDouble);
+        objProduct.setValorProdB(valorBDouble);
+        objProduct.setValorProdV(valorVDouble);
         objProduct.setEstoque(estoqueInt);
         oPers.PersUpdProduct(objProduct);
     }

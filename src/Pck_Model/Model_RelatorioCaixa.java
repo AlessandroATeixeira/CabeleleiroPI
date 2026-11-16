@@ -11,9 +11,9 @@ public class Model_RelatorioCaixa {
 
     public void somar(Model_Caixa mov) {
         if (mov.isEntrada()) {
-            entradas += mov.getValor();
+            entradas += mov.getValorB();
         } else {
-            saidas += mov.getValor();
+            saidas += mov.getValorV();
         }
     }
 

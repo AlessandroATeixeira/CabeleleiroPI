@@ -2,6 +2,7 @@ package Pck_Model;
 
 public class Model_Scheduling {
     private int codigo;
+    private int codCliente;
     private String servico;
     private String horario;
     private String data;
@@ -12,6 +13,11 @@ public class Model_Scheduling {
     }
     public void setCodigo(int codigo) {
         this.codigo = codigo;
+    }
+
+    public int getCodCliente(){return codCliente;}
+    public void setCodCliente(int codCliente){
+        this.codCliente = codCliente;
     }
 
     public String getServico() {

@@ -116,6 +116,7 @@ public final class Tema {
         return g2;
     }
 
+
     // ------------------------------------------------------------------
     // Cartao arredondado (equivalente aos "cards" brancos do modelo)
     // ------------------------------------------------------------------

@@ -37,7 +37,7 @@ public class Persistence_Caixa {
                 oCall.setInt(4, m.getQuantidade());
             }
             oCall.setString(5, m.getDescricao());
-            oCall.setBigDecimal(6, BigDecimal.valueOf(m.getValor()).setScale(2, RoundingMode.HALF_UP));
+            oCall.setBigDecimal(6, BigDecimal.valueOf(m.getValorB()).setScale(2, RoundingMode.HALF_UP));
             oCall.execute();
             oCall.close();
         } finally {

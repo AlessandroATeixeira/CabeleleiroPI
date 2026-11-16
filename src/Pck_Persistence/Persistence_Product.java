@@ -21,11 +21,12 @@ public class Persistence_Product {
     public void PersInsProduct(Model_Product Model_Product){
         try {
             try {
-                oCall = oConectar.getConexao(login,senha).prepareCall("CALL proc_ins_produto(?, ?, ?, ?)");
+                oCall = oConectar.getConexao(login,senha).prepareCall("CALL proc_ins_produto(?, ?, ?, ?, ?)");
                 oCall.setInt(1, Model_Product.getCodigo());
                 oCall.setString(2, Model_Product.getNome());
-                oCall.setDouble(3, Model_Product.getValorProd());
-                oCall.setInt(4, Model_Product.getEstoque());
+                oCall.setDouble(3, Model_Product.getValorProdB());
+                oCall.setDouble(4, Model_Product.getValorProdV());
+                oCall.setInt(5, Model_Product.getEstoque());
                 oCall.execute();
                 oCall.close();
             }catch (SQLException e){e.printStackTrace();}
@@ -35,11 +36,12 @@ public class Persistence_Product {
     public void PersUpdProduct(Model_Product Model_Product){
         try{
             try {
-                oCall = oConectar.getConexao(login,senha).prepareCall("CALL proc_upd_produto(?, ?, ?, ?)");
+                oCall = oConectar.getConexao(login,senha).prepareCall("CALL proc_upd_produto(?, ?, ?, ?, ?)");
                 oCall.setInt(1, Model_Product.getCodigo());
                 oCall.setString(2, Model_Product.getNome());
-                oCall.setDouble(3, Model_Product.getValorProd());
-                oCall.setInt(4, Model_Product.getEstoque());
+                oCall.setDouble(3, Model_Product.getValorProdB());
+                oCall.setDouble(4, Model_Product.getValorProdV());
+                oCall.setInt(5, Model_Product.getEstoque());
                 oCall.execute();
                 oCall.close();
             }catch (SQLException e){e.printStackTrace();}
@@ -65,7 +67,8 @@ public class Persistence_Product {
             Model_Product objProduct = new Model_Product();
             objProduct.setCodigo(oResultSet.getInt("cod_produto"));
             objProduct.setNome(oResultSet.getString("nome_prod"));
-            objProduct.setValorProd(oResultSet.getDouble("valor_prod"));
+            objProduct.setValorProdB(oResultSet.getDouble("valorBruto"));
+            objProduct.setValorProdV(oResultSet.getDouble("valorDeVenda"));
             objProduct.setEstoque(oResultSet.getInt("estoque"));
             lista.add(objProduct);
         }

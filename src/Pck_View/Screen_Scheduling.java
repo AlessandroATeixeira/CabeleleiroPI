@@ -18,6 +18,7 @@ import Pck_Model.Model_Scheduling;
 public class Screen_Scheduling extends Tela_Base {
 
     private Tema.Campo txtCodigo;
+    private Tema.Campo txtCodCliente;
     private Tema.Campo txtData;
     private Tema.Campo txtHorario;
     private JComboBox<String> cbServico;
@@ -46,6 +47,7 @@ public class Screen_Scheduling extends Tela_Base {
     private void criarComponentes() {
         // ---- Formulario ----
         txtCodigo = new Tema.Campo("Ex.: 1");
+        txtCodCliente = new Tema.Campo("Ex.: 1");
         txtData = new Tema.Campo("dd/mm/aaaa");
         txtHorario = new Tema.Campo("HH:mm");
         cbServico = Tema.combo("Luzes", "Alisamento", "Escova", "Progressiva");
@@ -59,8 +61,9 @@ public class Screen_Scheduling extends Tela_Base {
         Tema.Cartao formulario = cartaoComTitulo("Dados do agendamento", null);
         JPanel corpo = new JPanel(new BorderLayout(0, 18));
         corpo.setOpaque(false);
-        corpo.add(linhaCampos(new double[]{1, 2, 1.5, 1.2},
+        corpo.add(linhaCampos(new double[]{1,1, 2, 1.5, 1.2},
                 Tema.campoComRotulo("Código", txtCodigo),
+                Tema.campoComRotulo("ID Cliente", txtCodCliente),
                 Tema.campoComRotulo("Serviço", cbServico),
                 Tema.campoComRotulo("Data", txtData),
                 Tema.campoComRotulo("Horário", txtHorario)), BorderLayout.NORTH);
@@ -68,7 +71,7 @@ public class Screen_Scheduling extends Tela_Base {
         formulario.add(corpo, BorderLayout.CENTER);
 
         // ---- Tabela ----
-        modelo = new DefaultTableModel(new Object[]{"Código", "Data", "Horário", "Serviço"}, 0) {
+        modelo = new DefaultTableModel(new Object[]{"Código","ID_Cliente", "Data", "Horário", "Serviço"}, 0) {
             @Override
             public boolean isCellEditable(int linha, int coluna) {
                 return false;
@@ -111,7 +114,7 @@ public class Screen_Scheduling extends Tela_Base {
 
     private void agendar() {
         try {
-            control.Inserir(txtCodigo.getText(), servicoSelecionado(), txtData.getText(), txtHorario.getText());
+            control.Inserir(txtCodigo.getText(), txtCodCliente.getText(), servicoSelecionado(), txtData.getText(), txtHorario.getText());
             mostrarInfo("Agendamento salvo com sucesso.");
             limparCampos();
             consultarAgendamentos();
@@ -122,7 +125,7 @@ public class Screen_Scheduling extends Tela_Base {
 
     private void atualizar() {
         try {
-            control.Atualizar(txtCodigo.getText(), servicoSelecionado(), txtData.getText(), txtHorario.getText());
+            control.Atualizar(txtCodigo.getText(), txtCodCliente.getText(), servicoSelecionado(), txtData.getText(), txtHorario.getText());
             mostrarInfo("Agendamento atualizado com sucesso.");
             limparCampos();
             consultarAgendamentos();
@@ -156,6 +159,7 @@ public class Screen_Scheduling extends Tela_Base {
             for (Model_Scheduling c : lista) {
                 modelo.addRow(new Object[]{
                         c.getCodigo(),
+                        c.getCodCliente(),
                         LocalDate.parse(c.getData()).format(FORMATO_DATA),
                         LocalTime.parse(c.getHorario()).format(FORMATO_HORARIO),
                         c.getServico()});

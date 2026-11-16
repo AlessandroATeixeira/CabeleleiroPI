@@ -46,7 +46,7 @@ public class Control_Caixa {
         if (m.getDescricao().isEmpty()) {
             throw new Exception("Informe uma descrição.");
         }
-        if (m.getValor() <= 0) {
+        if (m.getValorB() <= 0) {
             throw new Exception("O valor deve ser maior que zero.");
         }
         oPers.PersInsCaixa(m);
@@ -59,7 +59,7 @@ public class Control_Caixa {
     public static double saldo(List<Model_Caixa> movimentos) {
         double saldo = 0;
         for (Model_Caixa m : movimentos) {
-            saldo += m.isEntrada() ? m.getValor() : -m.getValor();
+            saldo += m.isEntrada() ? m.getValorB() : -m.getValorV();
         }
         return saldo;
     }

@@ -16,8 +16,9 @@ public class Control_Scheduling {
 
     Persistence_Scheduling oPers = new Persistence_Scheduling();
 
-    public void Inserir(String codigo, String servico, String data, String hora) throws Exception {
+    public void Inserir(String codigo,String codCliente, String servico, String data, String hora) throws Exception {
         int codigoInt = Integer.parseInt(codigo.trim());
+        int codClienteInt = Integer.parseInt(codCliente.trim());
         if (codigoInt <= 0) {
             throw new Exception("O código do agendamento deve ser maior que zero.");
         }
@@ -28,14 +29,16 @@ public class Control_Scheduling {
 
         Model_Scheduling objScheduling = new Model_Scheduling();
         objScheduling.setCodigo(codigoInt);
+        objScheduling.setCodCliente(codClienteInt);
         objScheduling.setServico(servico.trim());
         objScheduling.setData(LocalDate.parse(data.trim(), FORMATO_DATA).toString());
         objScheduling.setHorario(LocalTime.parse(hora.trim(), FORMATO_HORA).format(FORMATO_HORA_BD));
         oPers.PersInsScheduling(objScheduling);
     }
 
-    public void Atualizar(String codigo, String servico, String data, String hora) throws Exception {
+    public void Atualizar(String codigo, String codCliente, String servico, String data, String hora) throws Exception {
         int codigoInt = Integer.parseInt(codigo.trim());
+        int codClienteInt = Integer.parseInt(codCliente.trim());
         if (codigoInt <= 0) {
             throw new Exception("O código do agendamento deve ser maior que zero.");
         }
@@ -46,6 +49,7 @@ public class Control_Scheduling {
 
         Model_Scheduling objScheduling = new Model_Scheduling();
         objScheduling.setCodigo(codigoInt);
+        objScheduling.setCodCliente(codClienteInt);
         objScheduling.setServico(servico.trim());
         objScheduling.setData(LocalDate.parse(data.trim(), FORMATO_DATA).toString());
         objScheduling.setHorario(LocalTime.parse(hora.trim(), FORMATO_HORA).format(FORMATO_HORA_BD));

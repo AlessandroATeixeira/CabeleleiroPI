@@ -6,6 +6,7 @@ import java.awt.GridLayout;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -84,7 +85,7 @@ public class Tela_Caixa extends Tela_Base {
         JPanel linha1 = linhaCampos(new double[]{1, 1, 3},
                 Tema.campoComRotulo("Tipo", comboTipo),
                 Tema.campoComRotulo("Origem", cbOrigem),
-                Tema.campoComRotulo("Produto", cbProduto));
+                Tema.campoComRotulo("Produto / Servico ", cbProduto));
         JPanel linha2 = linhaCampos(new double[]{1, 1, 3},
                 Tema.campoComRotulo("Quantidade", txtQuantidade),
                 campoComRotulo(lblValor, txtValor),
@@ -216,9 +217,16 @@ public class Tela_Caixa extends Tela_Base {
     }
 
     private void preencherValorDoProduto() {
+
+        String tipoSelecionado = String.valueOf(comboTipo.getSelectedItem());
         Model_Product p = produtoSelecionado();
         if (origemProduto() && p != null) {
-            txtValor.setText(String.format("%.2f", p.getValorProd()).replace('.', ','));
+            if(Objects.equals(tipoSelecionado, "ENTRADA")){
+                txtValor.setText(String.format("%.2f", p.getValorProdV()).replace('.', ','));
+            }else{
+                txtValor.setText(String.format("%.2f", p.getValorProdB()).replace('.', ','));
+
+            }
         }
     }
 
@@ -332,7 +340,7 @@ public class Tela_Caixa extends Tela_Base {
                         "PRODUTO".equals(m.getOrigem()) ? "Produto" : "Serviço",
                         m.getDescricao(),
                         m.getQuantidade() == null ? "—" : String.valueOf(m.getQuantidade()),
-                        sinal + Tema.moeda(m.getValor())
+                        sinal + Tema.moeda(m.getValorB())
                 });
             }
             lblSaldo.setText("Saldo atual: " + Tema.moeda(Control_Caixa.saldo(lista)));

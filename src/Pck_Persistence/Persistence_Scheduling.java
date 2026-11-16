@@ -16,11 +16,12 @@ public class Persistence_Scheduling {
 
     public void PersInsScheduling(Model_Scheduling modelScheduling) {
         try {
-            oCall = oConectar.getConexao(login, senha).prepareCall("CALL proc_ins_agendamento(?, ?, ?, ?)");
+            oCall = oConectar.getConexao(login, senha).prepareCall("CALL proc_ins_agendamento(?, ?, ?, ?, ?)");
             oCall.setInt(1, modelScheduling.getCodigo());
-            oCall.setString(2, modelScheduling.getServico());
-            oCall.setDate(3, Date.valueOf(modelScheduling.getData())); // yyyy-MM-dd
-            oCall.setTime(4, Time.valueOf(modelScheduling.getHorario())); // HH:mm:ss
+            oCall.setInt(2, modelScheduling.getCodCliente());
+            oCall.setString(3, modelScheduling.getServico());
+            oCall.setDate(4, Date.valueOf(modelScheduling.getData())); // yyyy-MM-dd
+            oCall.setTime(5, Time.valueOf(modelScheduling.getHorario())); // HH:mm:ss
             oCall.execute();
             oCall.close();
         } catch (SQLException e) {
@@ -32,11 +33,12 @@ public class Persistence_Scheduling {
 
     public void PersUpdScheduling(Model_Scheduling modelScheduling) {
         try {
-            oCall = oConectar.getConexao(login, senha).prepareCall("CALL proc_upd_agendamento(?, ?, ?, ?)");
+            oCall = oConectar.getConexao(login, senha).prepareCall("CALL proc_upd_agendamento(?, ?, ?, ?, ?)");
             oCall.setInt(1, modelScheduling.getCodigo());
-            oCall.setString(2, modelScheduling.getServico());
-            oCall.setDate(3, Date.valueOf(modelScheduling.getData()));
-            oCall.setTime(4, Time.valueOf(modelScheduling.getHorario()));
+            oCall.setInt(2, modelScheduling.getCodCliente());
+            oCall.setString(3, modelScheduling.getServico());
+            oCall.setDate(4, Date.valueOf(modelScheduling.getData()));
+            oCall.setTime(5, Time.valueOf(modelScheduling.getHorario()));
             oCall.execute();
             oCall.close();
         } catch (SQLException e) {
@@ -66,6 +68,7 @@ public class Persistence_Scheduling {
         while (oResultSet.next()) {
             Model_Scheduling objScheduling = new Model_Scheduling();
             objScheduling.setCodigo(oResultSet.getInt("cod_agendamento"));
+            objScheduling.setCodCliente(oResultSet.getInt("cod_cliente"));
             objScheduling.setServico(oResultSet.getString("servico"));
             objScheduling.setData(oResultSet.getString("data_agendamento"));
             objScheduling.setHorario(oResultSet.getString("horario"));

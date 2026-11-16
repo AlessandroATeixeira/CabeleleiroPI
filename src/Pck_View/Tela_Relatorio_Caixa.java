@@ -11,6 +11,7 @@ import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComboBox;
@@ -24,7 +25,7 @@ import Pck_Model.Model_RelatorioCaixa;
 
 public class Tela_Relatorio_Caixa extends Tela_Base {
 
-    private JComboBox<String> comboPeriodo;
+    private static JComboBox<String> comboPeriodo;
     private JLabel lblTotalEntradas;
     private JLabel lblTotalSaidas;
     private JLabel lblSaldo;
@@ -202,6 +203,7 @@ public class Tela_Relatorio_Caixa extends Tela_Base {
         protected void paintComponent(Graphics graphics) {
             super.paintComponent(graphics);
             Graphics2D g = Tema.suave(graphics);
+            String periodoSelecionado = String.valueOf(comboPeriodo.getSelectedItem());
 
             int largura = getWidth();
             int altura = getHeight();
@@ -221,11 +223,21 @@ public class Tela_Relatorio_Caixa extends Tela_Base {
             }
 
             double maiorValor = 0;
-            if (maiorValor <= 0) {
+            if (Objects.equals(periodoSelecionado, "Mensal") && maiorValor <= 0) {
                 for (Model_RelatorioCaixa item : dados) {
                     maiorValor = Math.max(maiorValor, Math.max(item.getEntradas(), item.getSaidas()));
                 }
-                maiorValor = 100;   // sem movimentacao: eixo padrao
+                maiorValor = 5000;
+            }if (Objects.equals(periodoSelecionado, "Semestral") && maiorValor <= 0) {
+                for (Model_RelatorioCaixa item : dados) {
+                    maiorValor = Math.max(maiorValor, Math.max(item.getEntradas(), item.getSaidas()));
+                }
+                maiorValor = 15000;
+            }if (Objects.equals(periodoSelecionado, "Anual") && maiorValor <= 0) {
+                for (Model_RelatorioCaixa item : dados) {
+                    maiorValor = Math.max(maiorValor, Math.max(item.getEntradas(), item.getSaidas()));
+                }
+                maiorValor = 30000;
             }
 
             maiorValor = escalaMaxima(maiorValor);
