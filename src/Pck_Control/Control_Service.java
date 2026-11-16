@@ -9,19 +9,17 @@ import Pck_Persistence.Persistence_Service;
 public class Control_Service {
     private final Persistence_Service persistence = new Persistence_Service();
 
-    public void inserir(String nome) throws Exception {
+    public void inserir(String nome, String valor) throws Exception {
         validarNome(nome);
-        Model_Service servico = new Model_Service();
-        servico.setNomeServico(nome.trim());
+        Model_Service servico = criarServico(nome, valor);
         persistence.inserir(servico);
     }
 
-    public void atualizar(String id, String nome) throws Exception {
+    public void atualizar(String id, String nome, String valor) throws Exception {
         int codigo = converterId(id);
         validarNome(nome);
-        Model_Service servico = new Model_Service();
+        Model_Service servico = criarServico(nome, valor);
         servico.setIdServico(codigo);
-        servico.setNomeServico(nome.trim());
         persistence.atualizar(servico);
     }
 
@@ -33,12 +31,30 @@ public class Control_Service {
         return persistence.listar();
     }
 
-    private int converterId(String id) {
-        int codigo = Integer.parseInt(id.trim());
-        if (codigo <= 0) {
-            throw new IllegalArgumentException("O código do serviço deve ser maior que zero.");
+    private Model_Service criarServico(String nome, String valor) {
+        double preco;
+        try {
+            preco = Double.parseDouble(valor.trim().replace(".", "").replace(",", "."));
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Informe um valor válido para o serviço.");
         }
-        return codigo;
+        if (!Double.isFinite(preco) || preco <= 0) {
+            throw new IllegalArgumentException("O valor do serviço deve ser maior que zero.");
+        }
+        Model_Service servico = new Model_Service();
+        servico.setNomeServico(nome.trim());
+        servico.setValorServico(preco);
+        return servico;
+    }
+
+    private int converterId(String id) {
+        try {
+            int codigo = Integer.parseInt(id.trim());
+            if (codigo <= 0) throw new IllegalArgumentException();
+            return codigo;
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Selecione um serviço válido.");
+        }
     }
 
     private void validarNome(String nome) {
