@@ -19,11 +19,11 @@ import javax.swing.table.DefaultTableModel;
 
 import Pck_Control.Control_Caixa;
 import Pck_Control.Control_Product;
-import Pck_Control.Control_Service;
+import Pck_Control.Control_Scheduling;
 import Pck_Control.Control_Valor;
 import Pck_Model.Model_Caixa;
 import Pck_Model.Model_Product;
-import Pck_Model.Model_Service;
+import Pck_Model.Model_Scheduling;
 
 /**
  * Caixa integrado ao estoque:
@@ -37,7 +37,7 @@ public class Tela_Caixa extends Tela_Base {
     private JComboBox<String> comboTipo;
     private JComboBox<String> cbOrigem;
     private JComboBox<String> cbProduto;
-    private JComboBox<String> cbServico;
+    private JComboBox<String> cbAgendamento;
     private Tema.Campo txtQuantidade;
     private Tema.Campo txtValor;
     private Tema.Campo txtDescricao;
@@ -53,13 +53,13 @@ public class Tela_Caixa extends Tela_Base {
     private DefaultTableModel modelo;
 
     private final List<Model_Product> produtos = new ArrayList<>();
-    private final List<Model_Service> servicos = new ArrayList<>();
+    private final List<Model_Scheduling> agendamentos = new ArrayList<>();
     private boolean atualizandoProdutos = false;
-    private boolean atualizandoServicos = false;
+    private boolean atualizandoAgendamentos = false;
 
     private final Control_Caixa control = new Control_Caixa();
     private final Control_Product controlProduto = new Control_Product();
-    private final Control_Service controlServico = new Control_Service();
+    private final Control_Scheduling controlAgendamento = new Control_Scheduling();
 
     private static final DateTimeFormatter FORMATO = DateTimeFormatter.ofPattern("dd/MM/uuuu HH:mm");
 
@@ -75,7 +75,7 @@ public class Tela_Caixa extends Tela_Base {
         comboTipo = Tema.combo("ENTRADA", "SAÍDA");
         cbOrigem = Tema.combo("Produto", "Serviço");
         cbProduto = Tema.combo();
-        cbServico = Tema.combo();
+        cbAgendamento = Tema.combo();
         txtQuantidade = new Tema.Campo("1");
         txtValor = new Tema.Campo("0,00");
         txtValor.setEditable(false); // O valor vem do cadastro do produto/serviço conforme o tipo da movimentação.
@@ -94,7 +94,7 @@ public class Tela_Caixa extends Tela_Base {
                 Tema.campoComRotulo("Tipo", comboTipo),
                 Tema.campoComRotulo("Origem", cbOrigem),
                 Tema.campoComRotulo("Produto", cbProduto),
-                Tema.campoComRotulo("Serviço", cbServico));
+                Tema.campoComRotulo("Agendamento (cliente/serviço)", cbAgendamento));
         JPanel linha2 = linhaCampos(new double[]{1, 1, 3},
                 Tema.campoComRotulo("Quantidade", txtQuantidade),
                 campoComRotulo(lblValor, txtValor),
@@ -166,9 +166,7 @@ public class Tela_Caixa extends Tela_Base {
 
         comboTipo.addActionListener(e -> atualizarModo());
         cbOrigem.addActionListener(e -> atualizarModo());
-        cbServico.addActionListener(e -> {
-            if (!atualizandoServicos) preencherValorDoServico();
-        });
+        cbAgendamento.addActionListener(e -> { if (!atualizandoAgendamentos) preencherValorDoAgendamento(); });
         cbProduto.addActionListener(e -> {
             if (!atualizandoProdutos) {
                 preencherValorDoProduto();
@@ -187,7 +185,7 @@ public class Tela_Caixa extends Tela_Base {
     @Override
     public void aoExibir() {
         carregarProdutos();
-        carregarServicos();
+        carregarAgendamentos();
         carregarMovimentos();
     }
 
@@ -205,7 +203,7 @@ public class Tela_Caixa extends Tela_Base {
     private void atualizarModo() {
         boolean produto = origemProduto();
         cbProduto.setEnabled(produto);
-        cbServico.setEnabled(!produto);
+        cbAgendamento.setEnabled(!produto);
         txtQuantidade.setEnabled(produto);
         lblValor.setText(produto ? "Valor unitário (R$)" : "Valor (R$)");
         txtDescricao.setToolTipText(produto ? "Se ficar em branco, a descrição é gerada automaticamente." : null);
@@ -218,7 +216,7 @@ public class Tela_Caixa extends Tela_Base {
                 preencherValorDoProduto();
             }
         } else {
-            preencherValorDoServico();
+            preencherValorDoAgendamento();
             lblDica.setText(entrada()
                     ? "Receita de serviço: soma ao saldo do caixa."
                     : "Despesa: reduz o saldo do caixa.");
@@ -231,15 +229,23 @@ public class Tela_Caixa extends Tela_Base {
         return (i >= 0 && i < produtos.size()) ? produtos.get(i) : null;
     }
 
-    private Model_Service servicoSelecionado() {
-        int i = cbServico.getSelectedIndex();
-        return (i >= 0 && i < servicos.size()) ? servicos.get(i) : null;
+    private Model_Scheduling agendamentoSelecionado() {
+        int i = cbAgendamento.getSelectedIndex();
+        return (i >= 0 && i < agendamentos.size()) ? agendamentos.get(i) : null;
     }
 
-    private void preencherValorDoServico() {
-        Model_Service s = servicoSelecionado();
-        if (!origemProduto() && s != null) {
-            txtValor.setText(String.format("%.2f", s.getValorServico()).replace('.', ','));
+    private void preencherValorDoAgendamento() {
+        Model_Scheduling a = agendamentoSelecionado();
+        if (!origemProduto() && a != null) {
+            try {
+                for (Pck_Model.Model_Service servico : new Control_Service().consultar()) {
+                    if (servico.getIdServico() == a.getIdServico()) {
+                        txtValor.setText(String.format("%.2f", servico.getValorServico()).replace('.', ','));
+                        return;
+                    }
+                }
+                txtValor.setText("");
+            } catch (Exception ex) { mostrarErro(ex); }
         }
     }
 
@@ -278,7 +284,7 @@ public class Tela_Caixa extends Tela_Base {
         if (cbProduto.getItemCount() > 0) {
             cbProduto.setSelectedIndex(0);
         }
-        if (cbServico.getItemCount() > 0) cbServico.setSelectedIndex(0);
+        if (cbAgendamento.getItemCount() > 0) cbAgendamento.setSelectedIndex(0);
         atualizarModo();
         tabela.clearSelection();
     }
@@ -290,9 +296,9 @@ public class Tela_Caixa extends Tela_Base {
         try {
             boolean produto = origemProduto();
             Model_Product p = produtoSelecionado();
-            Model_Service s = servicoSelecionado();
-            if (!produto && s == null) {
-                mostrarInfo("Cadastre e selecione um serviço antes de registrar uma movimentação de serviço.");
+            Model_Scheduling a = agendamentoSelecionado();
+            if (!produto && a == null) {
+                mostrarInfo("Selecione um agendamento disponível antes de registrar o serviço.");
                 return;
             }
             if (produto && p == null) {
@@ -302,7 +308,7 @@ public class Tela_Caixa extends Tela_Base {
 
             String descricao = txtDescricao.getText().trim();
             if (descricao.isEmpty()) {
-                descricao = produto ? (entrada() ? "Venda: " : "Compra: ") + p.getNome() : "Serviço: " + s.getNomeServico();
+                descricao = produto ? (entrada() ? "Venda: " : "Compra: ") + p.getNome() : "Serviço: " + a.getServico() + " - Cliente: " + a.getNomeCliente();
             }
 
             double unit = Control_Valor.parse(txtValor.getText());
@@ -313,17 +319,18 @@ public class Tela_Caixa extends Tela_Base {
                     entrada() ? "ENTRADA" : "SAIDA",
                     produto ? "PRODUTO" : "SERVICO",
                     produto ? p.getCodigo() : null,
-                    produto ? null : s.getIdServico(),
+                    produto ? null : a.getIdServico(),
                     produto ? txtQuantidade.getText() : null,
                     descricao,
-                    total);
+                    total,
+                    produto ? null : a.getCodigo());
 
             mostrarInfo(produto
                     ? "Movimentação registrada. Estoque de \"" + p.getNome() + "\" atualizado."
                     : "Movimentação registrada com sucesso.");
             limparCampos();
             carregarProdutos();   // estoque novo aparece na lista de produtos
-            carregarServicos();
+            carregarAgendamentos();
             carregarMovimentos();
         } catch (Exception e) {
             mostrarErro(e);
@@ -363,26 +370,27 @@ public class Tela_Caixa extends Tela_Base {
         }
     }
 
-    private void carregarServicos() {
+    private void carregarAgendamentos() {
         try {
-            Integer atual = servicoSelecionado() == null ? null : servicoSelecionado().getIdServico();
-            ArrayList<Model_Service> lista = controlServico.consultar();
-            atualizandoServicos = true;
-            servicos.clear();
-            servicos.addAll(lista);
-            cbServico.removeAllItems();
+            Integer atual = agendamentoSelecionado() == null ? null : agendamentoSelecionado().getCodigo();
+            ArrayList<Model_Scheduling> lista = controlAgendamento.ConsultarDisponiveisCaixa();
+            atualizandoAgendamentos = true;
+            agendamentos.clear();
+            agendamentos.addAll(lista);
+            cbAgendamento.removeAllItems();
             int indice = 0;
             for (int i = 0; i < lista.size(); i++) {
-                Model_Service s = lista.get(i);
-                cbServico.addItem(s.getIdServico() + " - " + s.getNomeServico() + " (" + Tema.moeda(s.getValorServico()) + ")");
-                if (atual != null && atual == s.getIdServico()) indice = i;
+                Model_Scheduling a = lista.get(i);
+                cbAgendamento.addItem("#" + a.getCodigo() + " - " + a.getData() + " " + a.getHorario()
+                        + " | " + a.getNomeCliente() + " | " + a.getServico());
+                if (atual != null && atual == a.getCodigo()) indice = i;
             }
-            if (lista.isEmpty()) cbServico.addItem("Nenhum serviço cadastrado");
-            else cbServico.setSelectedIndex(indice);
-            atualizandoServicos = false;
-            if (!origemProduto()) preencherValorDoServico();
+            if (lista.isEmpty()) cbAgendamento.addItem("Nenhum agendamento disponível");
+            else cbAgendamento.setSelectedIndex(indice);
+            atualizandoAgendamentos = false;
+            if (!origemProduto()) preencherValorDoAgendamento();
         } catch (Exception e) {
-            atualizandoServicos = false;
+            atualizandoAgendamentos = false;
             mostrarErro(e);
         }
     }
@@ -397,7 +405,7 @@ public class Tela_Caixa extends Tela_Base {
                         m.getDataHora() == null ? "" : m.getDataHora().format(FORMATO),
                         m.isEntrada() ? "ENTRADA" : "SAÍDA",
                         "PRODUTO".equals(m.getOrigem()) ? "Produto" : "Serviço",
-                        m.getDescricao(),
+                        m.getNomeCliente() == null ? m.getDescricao() : m.getNomeCliente() + " - " + m.getDescricao(),
                         m.getQuantidade() == null ? "—" : String.valueOf(m.getQuantidade()),
                         sinal + Tema.moeda(m.getValorB())
                 });
