@@ -487,10 +487,26 @@ END$$
 
 CREATE PROCEDURE proc_selc_agendamentos()
 BEGIN
-SELECT a.cod_agendamento, a.cod_cliente, a.id_servico,
-       s.nm_servico AS servico, a.data_agendamento, a.horario
+SELECT a.cod_agendamento, a.cod_cliente, c.c_nome AS cliente,
+       a.id_servico, s.nm_servico AS servico, s.vl_valor AS valor_servico,
+       a.data_agendamento, a.horario
 FROM agendamento a
-         INNER JOIN servicos s ON s.id_servico = a.id_servico
+INNER JOIN cliente c ON c.cod_cliente = a.cod_cliente
+INNER JOIN servicos s ON s.id_servico = a.id_servico
+ORDER BY a.data_agendamento, a.horario;
+END$
+
+CREATE PROCEDURE proc_selc_agendamentos_disponiveis_caixa()
+BEGIN
+SELECT a.cod_agendamento, a.cod_cliente, c.c_nome AS cliente,
+       a.id_servico, s.nm_servico AS servico, s.vl_valor AS valor_servico,
+       a.data_agendamento, a.horario
+FROM agendamento a
+INNER JOIN cliente c ON c.cod_cliente = a.cod_cliente
+INNER JOIN servicos s ON s.id_servico = a.id_servico
+WHERE NOT EXISTS (
+    SELECT 1 FROM caixa cx WHERE cx.cod_agendamento = a.cod_agendamento
+)
 ORDER BY a.data_agendamento, a.horario;
 END$$
 
