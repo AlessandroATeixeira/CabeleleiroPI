@@ -22,7 +22,7 @@ public class Persistence_Caixa {
             throw new IllegalArgumentException("A movimentação não foi informada.");
         }
 
-        String sql = "{CALL proc_ins_caixa(?, ?, ?, ?, ?, ?, ?)}";
+        String sql = "{CALL proc_ins_caixa(?, ?, ?, ?, ?, ?, ?, ?)}";
         try (Connection conn = new Conexao().getConexao(LOGIN, SENHA);
              CallableStatement call = conn.prepareCall(sql)) {
             call.setString(1, movimento.getTipo());
@@ -40,6 +40,8 @@ public class Persistence_Caixa {
             call.setString(6, movimento.getDescricao());
             call.setBigDecimal(7, BigDecimal.valueOf(movimento.getValorB())
                     .setScale(2, RoundingMode.HALF_UP));
+            if (movimento.getCodAgendamento() == null) call.setNull(8, Types.INTEGER);
+            else call.setInt(8, movimento.getCodAgendamento());
             call.execute();
         } catch (SQLException e) {
             throw new SQLException("Não foi possível registrar a movimentação no caixa: " + e.getMessage(), e);
@@ -70,6 +72,9 @@ public class Persistence_Caixa {
                 int idServico = rs.getInt("id_servico");
                 movimento.setCodServico(rs.wasNull() ? null : idServico);
                 movimento.setNomeServico(rs.getString("nm_servico"));
+                int codAgendamento = rs.getInt("cod_agendamento");
+                movimento.setCodAgendamento(rs.wasNull() ? null : codAgendamento);
+                movimento.setNomeCliente(rs.getString("nome_cliente"));
 
                 int quantidade = rs.getInt("quantidade");
                 movimento.setQuantidade(rs.wasNull() ? null : quantidade);
