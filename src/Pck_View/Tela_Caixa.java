@@ -20,6 +20,7 @@ import javax.swing.table.DefaultTableModel;
 import Pck_Control.Control_Caixa;
 import Pck_Control.Control_Product;
 import Pck_Control.Control_Scheduling;
+import Pck_Control.Control_Service;
 import Pck_Control.Control_Valor;
 import Pck_Model.Model_Caixa;
 import Pck_Model.Model_Product;
@@ -237,15 +238,7 @@ public class Tela_Caixa extends Tela_Base {
     private void preencherValorDoAgendamento() {
         Model_Scheduling a = agendamentoSelecionado();
         if (!origemProduto() && a != null) {
-            try {
-                for (Pck_Model.Model_Service servico : new Control_Service().consultar()) {
-                    if (servico.getIdServico() == a.getIdServico()) {
-                        txtValor.setText(String.format("%.2f", servico.getValorServico()).replace('.', ','));
-                        return;
-                    }
-                }
-                txtValor.setText("");
-            } catch (Exception ex) { mostrarErro(ex); }
+            txtValor.setText(String.format("%.2f", a.getValorServico()).replace('.', ','));
         }
     }
 
