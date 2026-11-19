@@ -25,7 +25,7 @@ public class Control_Caixa {
      * @param valorTotal valor total da movimentacao (quantidade x valor unitario, no caso de produto)
      */
     public void Registrar(String tipo, String origem, Integer codProduto, Integer codServico, String quantidade,
-                          String descricao, double valorTotal) throws Exception {
+                          String descricao, double valorTotal, Integer codAgendamento) throws Exception {
         Model_Caixa m = new Model_Caixa();
         m.setTipo(tipo);
         m.setOrigem(origem);
@@ -33,8 +33,10 @@ public class Control_Caixa {
         m.setValor(Math.round(valorTotal * 100) / 100.0);
 
         if ("SERVICO".equals(origem)) {
-            if (codServico == null) throw new Exception("Selecione um serviço.");
+            if (codServico == null) throw new Exception("Selecione um agendamento.");
+            if (codAgendamento == null) throw new Exception("Selecione um agendamento válido.");
             m.setCodServico(codServico);
+            m.setCodAgendamento(codAgendamento);
         }
 
         if ("PRODUTO".equals(origem)) {
