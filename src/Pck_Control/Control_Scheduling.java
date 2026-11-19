@@ -48,4 +48,8 @@ public class Control_Scheduling {
     public ArrayList<Model_Scheduling> Consultar() throws Exception {
         return persistence.listScheduling();
     }
+
+    public ArrayList<Model_Scheduling> ConsultarDisponiveisCaixa() throws Exception {
+        return persistence.listAgendamentosDisponiveisCaixa();
+    }
 }
