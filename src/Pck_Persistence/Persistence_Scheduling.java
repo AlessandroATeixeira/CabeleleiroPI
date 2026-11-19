@@ -55,6 +55,7 @@ public class Persistence_Scheduling {
                 Model_Scheduling obj = new Model_Scheduling();
                 obj.setCodigo(rs.getInt("cod_agendamento"));
                 obj.setCodCliente(rs.getInt("cod_cliente"));
+                obj.setNomeCliente(rs.getString("cliente"));
                 obj.setIdServico(rs.getInt("id_servico"));
                 obj.setServico(rs.getString("servico"));
                 obj.setData(rs.getString("data_agendamento"));

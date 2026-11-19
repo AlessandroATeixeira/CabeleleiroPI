@@ -347,6 +347,31 @@ public final class Tema {
         return c;
     }
 
+    public static <T> JComboBox<T> comboObjetos() {
+        JComboBox<T> c = new JComboBox<T>() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = suave(g);
+                g2.setColor(CAMPO);
+                g2.fillRoundRect(0, 0, getWidth() - 1,
+                        getHeight() - 1, 12, 12);
+                g2.dispose();
+                super.paintComponent(g);
+            }
+        };
+
+        c.setUI(new ComboUI());
+        c.setOpaque(false);
+        c.setFont(fonte(Font.PLAIN, 14));
+        c.setForeground(TEXTO);
+        c.setRenderer(new RendererCombo());
+        c.setBorder(new BordaCampo());
+        c.setPreferredSize(new Dimension(160, 40));
+        c.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        return c;
+    }
+
     // ------------------------------------------------------------------
     // Rotulos e campos com legenda
     // ------------------------------------------------------------------

@@ -4,6 +4,7 @@ public class Model_Scheduling {
     private int codigo;
     private int codCliente;
     private int idServico;
+    private String cliente;
     private String servico;
     private String horario;
     private String data;
@@ -16,6 +17,9 @@ public class Model_Scheduling {
 
     public int getIdServico() { return idServico; }
     public void setIdServico(int idServico) { this.idServico = idServico; }
+
+    public String getNomoCliente() { return cliente; }
+    public void setNomeCliente(String cliente) { this.servico = cliente; }
 
     public String getServico() { return servico; }
     public void setServico(String servico) { this.servico = servico; }

@@ -76,6 +76,7 @@ public class Tela_Produto extends Tela_Base {
         Tema.Cartao cartaoTabela = cartaoComTitulo("Produtos cadastrados", lblTotal);
         cartaoTabela.add(Tema.tabela(tabela), BorderLayout.CENTER);
         tabela.getColumnModel().getColumn(2).setCellRenderer(Tema.rendererMoeda());
+        tabela.getColumnModel().getColumn(3).setCellRenderer(Tema.rendererMoeda());
 
         JPanel conteudo = new JPanel(new BorderLayout(0, 18));
         conteudo.setOpaque(false);

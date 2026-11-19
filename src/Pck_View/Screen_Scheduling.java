@@ -13,24 +13,30 @@ import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
+import Pck_Control.Control_Client;
 import Pck_Control.Control_Scheduling;
 import Pck_Control.Control_Service;
+import Pck_Model.Model_Client;
 import Pck_Model.Model_Scheduling;
 import Pck_Model.Model_Service;
 
 public class Screen_Scheduling extends Tela_Base {
-    private Tema.Campo txtCodigo, txtCodCliente, txtData, txtHorario;
-    private JComboBox<String> cbServico;
+    private Tema.Campo txtCodigo, txtData, txtHorario;
+    private JComboBox<Model_Service> cbServico;
+    private JComboBox<Model_Client> cbCodCliente;
     private Tema.Botao btnAgendar, btnAtualizar, btnExcluir, btnConsultar, btnLimpar;
     private JTable tabela;
     private DefaultTableModel modelo;
     private JLabel lblTotal;
     private static final DateTimeFormatter FORMATO_DATA = DateTimeFormatter.ofPattern("dd/MM/uuuu");
     private static final DateTimeFormatter FORMATO_HORARIO = DateTimeFormatter.ofPattern("HH:mm");
+    private final Control_Client controlClient = new Control_Client();
     private final Control_Scheduling control = new Control_Scheduling();
     private final Control_Service controlServico = new Control_Service();
     private final List<Model_Service> servicos = new ArrayList<>();
+    private final List<Model_Client> clientes = new ArrayList<>();
     private boolean carregandoServicos = false;
+    private boolean carregandoClient = false;
 
     public Screen_Scheduling() {
         super("Agendamentos", "Cadastre, consulte e gerencie os horários do salão.");
@@ -40,10 +46,11 @@ public class Screen_Scheduling extends Tela_Base {
 
     private void criarComponentes() {
         txtCodigo = new Tema.Campo("Ex.: 1");
-        txtCodCliente = new Tema.Campo("Ex.: 1");
         txtData = new Tema.Campo("dd/mm/aaaa");
         txtHorario = new Tema.Campo("HH:mm");
-        cbServico = Tema.combo();
+        cbServico = Tema.comboObjetos();
+        cbCodCliente = Tema.comboObjetos();
+
 
         btnAgendar = new Tema.Botao("Agendar", Tema.TipoBotao.PRIMARIO);
         btnAtualizar = new Tema.Botao("Atualizar", Tema.TipoBotao.SECUNDARIO);
@@ -56,14 +63,14 @@ public class Screen_Scheduling extends Tela_Base {
         corpo.setOpaque(false);
         corpo.add(linhaCampos(new double[]{1,1,2,1.5,1.2},
                 Tema.campoComRotulo("Código", txtCodigo),
-                Tema.campoComRotulo("ID Cliente", txtCodCliente),
+                Tema.campoComRotulo("Cliente", cbCodCliente),
                 Tema.campoComRotulo("Serviço cadastrado", cbServico),
                 Tema.campoComRotulo("Data", txtData),
                 Tema.campoComRotulo("Horário", txtHorario)), BorderLayout.NORTH);
         corpo.add(linhaBotoes(btnAgendar, btnAtualizar, btnExcluir, btnConsultar, btnLimpar), BorderLayout.SOUTH);
         formulario.add(corpo, BorderLayout.CENTER);
 
-        modelo = new DefaultTableModel(new Object[]{"Código","ID Cliente","Data","Horário","Serviço"}, 0) {
+        modelo = new DefaultTableModel(new Object[]{"Código","Cliente","Data","Horário","Serviço"}, 0) {
             @Override public boolean isCellEditable(int linha, int coluna) { return false; }
         };
         tabela = new JTable(modelo);
@@ -91,13 +98,18 @@ public class Screen_Scheduling extends Tela_Base {
 
     @Override public void aoExibir() {
         carregarServicos();
+        carregarClientes();
         consultarAgendamentos();
     }
 
     private Model_Service servicoSelecionado() {
-        Object selecionado = cbServico.getSelectedItem();
-        return selecionado instanceof Model_Service ? (Model_Service) selecionado : null;
+        return (Model_Service) cbServico.getSelectedItem();
     }
+    private Model_Client clienteSelecionado() {
+        return (Model_Client) cbCodCliente.getSelectedItem();
+
+    }
+
 
     private void carregarServicos() {
         try {
@@ -109,8 +121,12 @@ public class Screen_Scheduling extends Tela_Base {
             cbServico.removeAllItems();
             int indice = 0;
             for (int i=0; i<lista.size(); i++) {
-                String s = String.valueOf(lista.get(i));
-                cbServico.addItem(s);
+                Model_Service servico = lista.get(i);
+                cbServico.addItem(servico);
+                if (idAtual != null &&
+                        servico.getIdServico() == idAtual) {
+                    indice = i;
+                }
             }
             if (!lista.isEmpty()) cbServico.setSelectedIndex(indice);
             carregandoServicos = false;
@@ -121,11 +137,42 @@ public class Screen_Scheduling extends Tela_Base {
         }
     }
 
+    private void carregarClientes() {
+        try {
+            Integer idAtual = clienteSelecionado() == null ? null : clienteSelecionado().getCodigo();
+            ArrayList<Model_Client> lista = controlClient.Consultar();
+            carregandoClient = true;
+            clientes.clear();
+            clientes.addAll(lista);
+            cbCodCliente.removeAllItems();
+            int indice = 0;
+            for (int i=0; i<lista.size(); i++) {
+                Model_Client client = lista.get(i);
+                cbCodCliente.addItem(client);
+                if (idAtual != null &&
+                        client.getCodigo() == idAtual) {
+                    indice = i;
+                }
+            }
+            if (!lista.isEmpty()) cbCodCliente.setSelectedIndex(indice);
+            carregandoClient = false;
+            if (lista.isEmpty()) mostrarInfo("Cadastre pelo menos um serviço antes de criar agendamentos.");
+        } catch (Exception e) {
+            carregandoClient = false;
+            mostrarErro(e);
+        }
+    }
+
     private void agendar() {
         try {
             Model_Service s = servicoSelecionado();
+            Model_Client c = clienteSelecionado();
+
+            if (c == null) { mostrarInfo("Cadastre e selecione um cliente."); return; }
             if (s == null) { mostrarInfo("Cadastre e selecione um serviço."); return; }
-            control.Inserir(txtCodigo.getText(), txtCodCliente.getText(), s.getIdServico(), txtData.getText(), txtHorario.getText());
+
+
+            control.Inserir(txtCodigo.getText(), String.valueOf(c.getCodigo()), s.getIdServico(), txtData.getText(), txtHorario.getText());
             mostrarInfo("Agendamento salvo com sucesso.");
             limparCampos();
             consultarAgendamentos();
@@ -135,8 +182,12 @@ public class Screen_Scheduling extends Tela_Base {
     private void atualizar() {
         try {
             Model_Service s = servicoSelecionado();
+            Model_Client c = clienteSelecionado();
+
+            if (c == null) { mostrarInfo("Cadastre e selecione um serviço."); return; }
             if (s == null) { mostrarInfo("Cadastre e selecione um serviço."); return; }
-            control.Atualizar(txtCodigo.getText(), txtCodCliente.getText(), s.getIdServico(), txtData.getText(), txtHorario.getText());
+
+            control.Atualizar(txtCodigo.getText(), String.valueOf(c.getCodigo()), s.getIdServico(), txtData.getText(), txtHorario.getText());
             mostrarInfo("Agendamento atualizado com sucesso.");
             limparCampos();
             consultarAgendamentos();
@@ -159,7 +210,7 @@ public class Screen_Scheduling extends Tela_Base {
             ArrayList<Model_Scheduling> lista = control.Consultar();
             modelo.setRowCount(0);
             for (Model_Scheduling c : lista) {
-                modelo.addRow(new Object[]{c.getCodigo(), c.getCodCliente(),
+                modelo.addRow(new Object[]{c.getCodigo(), c.getNomoCliente(),
                         LocalDate.parse(c.getData()).format(FORMATO_DATA),
                         LocalTime.parse(c.getHorario()).format(FORMATO_HORARIO), c.getServico()});
             }
@@ -171,7 +222,13 @@ public class Screen_Scheduling extends Tela_Base {
         int linha = tabela.getSelectedRow();
         if (linha >= 0) {
             txtCodigo.setText(String.valueOf(modelo.getValueAt(linha,0)));
-            txtCodCliente.setText(String.valueOf(modelo.getValueAt(linha,1)));
+            String nomeCliente = String.valueOf(modelo.getValueAt(linha,1));
+            for (int i=0; i<clientes.size(); i++) {
+                if (clientes.get(i).getNome().equals(nomeCliente)) {
+                    cbCodCliente.setSelectedIndex(i);
+                    break;
+                }
+            }
             txtData.setText(String.valueOf(modelo.getValueAt(linha,2)));
             txtHorario.setText(String.valueOf(modelo.getValueAt(linha,3)));
             String nomeServico = String.valueOf(modelo.getValueAt(linha,4));
@@ -186,7 +243,7 @@ public class Screen_Scheduling extends Tela_Base {
 
     private void limparCampos() {
         txtCodigo.setText("");
-        txtCodCliente.setText("");
+        if(cbCodCliente.getItemCount()>0) cbCodCliente.setSelectedIndex(0);;
         txtData.setText("");
         txtHorario.setText("");
         if (cbServico.getItemCount()>0) cbServico.setSelectedIndex(0);
