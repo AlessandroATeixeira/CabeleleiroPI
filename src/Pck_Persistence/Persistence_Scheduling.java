@@ -46,8 +46,16 @@ public class Persistence_Scheduling {
     }
 
     public ArrayList<Model_Scheduling> listScheduling() throws SQLException {
+        return consultarAgendamentos("proc_selc_agendamentos");
+    }
+
+    public ArrayList<Model_Scheduling> listAgendamentosDisponiveisCaixa() throws SQLException {
+        return consultarAgendamentos("proc_selc_agendamentos_disponiveis_caixa");
+    }
+
+    private ArrayList<Model_Scheduling> consultarAgendamentos(String procedure) throws SQLException {
         ArrayList<Model_Scheduling> lista = new ArrayList<>();
-        String sql = "{CALL proc_selc_agendamentos()}";
+        String sql = "{CALL " + procedure + "()}";
         try (Connection conn = new Conexao().getConexao(LOGIN, SENHA);
              CallableStatement call = conn.prepareCall(sql);
              ResultSet rs = call.executeQuery()) {
@@ -58,6 +66,7 @@ public class Persistence_Scheduling {
                 obj.setNomeCliente(rs.getString("cliente"));
                 obj.setIdServico(rs.getInt("id_servico"));
                 obj.setServico(rs.getString("servico"));
+                obj.setValorServico(rs.getDouble("valor_servico"));
                 obj.setData(rs.getString("data_agendamento"));
                 obj.setHorario(rs.getString("horario"));
                 lista.add(obj);
