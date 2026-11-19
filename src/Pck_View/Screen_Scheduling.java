@@ -210,7 +210,7 @@ public class Screen_Scheduling extends Tela_Base {
             ArrayList<Model_Scheduling> lista = control.Consultar();
             modelo.setRowCount(0);
             for (Model_Scheduling c : lista) {
-                modelo.addRow(new Object[]{c.getCodigo(), c.getNomoCliente(),
+                modelo.addRow(new Object[]{c.getCodigo(), c.getNomeCliente(),
                         LocalDate.parse(c.getData()).format(FORMATO_DATA),
                         LocalTime.parse(c.getHorario()).format(FORMATO_HORARIO), c.getServico()});
             }
