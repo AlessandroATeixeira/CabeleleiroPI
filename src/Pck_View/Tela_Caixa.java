@@ -77,7 +77,7 @@ public class Tela_Caixa extends Tela_Base {
         cbOrigem = Tema.combo("Produto", "Serviço");
         cbProduto = Tema.combo();
         cbAgendamento = Tema.combo();
-        txtQuantidade = new Tema.Campo("1");
+        txtQuantidade = new Tema.Campo("Ex: 1");
         txtValor = new Tema.Campo("0,00");
         txtValor.setEditable(false); // O valor vem do cadastro do produto/serviço conforme o tipo da movimentação.
         txtDescricao = new Tema.Campo("Opcional para produto");
@@ -301,7 +301,7 @@ public class Tela_Caixa extends Tela_Base {
 
             String descricao = txtDescricao.getText().trim();
             if (descricao.isEmpty()) {
-                descricao = produto ? (entrada() ? "Venda: " : "Compra: ") + p.getNome() : "Serviço: " + a.getServico() + " - Cliente: " + a.getNomeCliente();
+                descricao = produto ? (entrada() ? "Venda: " : "Compra: ") : "Agendamento: " + a.getCodigo() + " || Serviço: " + a.getServico();
             }
 
             double unit = Control_Valor.parse(txtValor.getText());
@@ -398,7 +398,7 @@ public class Tela_Caixa extends Tela_Base {
                         m.getDataHora() == null ? "" : m.getDataHora().format(FORMATO),
                         m.isEntrada() ? "ENTRADA" : "SAÍDA",
                         "PRODUTO".equals(m.getOrigem()) ? "Produto" : "Serviço",
-                        m.getNomeCliente() == null ? m.getDescricao() : m.getNomeCliente() + " - " + m.getDescricao(),
+                        m.getNomeCliente() == null ? m.getDescricao() : "Cliente: " + m.getNomeCliente() + " - " + m.getDescricao(),
                         m.getQuantidade() == null ? "—" : String.valueOf(m.getQuantidade()),
                         sinal + Tema.moeda(m.getValorB())
                 });
