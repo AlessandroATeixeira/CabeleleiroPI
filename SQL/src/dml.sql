@@ -553,12 +553,13 @@ DELIMITER ;
 
 
 CREATE TABLE IF NOT EXISTS caixa (
-                                     cod_mov INT AUTO_INCREMENT PRIMARY KEY,
-                                     data_hora DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                                     tipo VARCHAR(7) NOT NULL,
+    cod_mov INT AUTO_INCREMENT PRIMARY KEY,
+    data_hora DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    tipo VARCHAR(7) NOT NULL,
     origem VARCHAR(10) NOT NULL,
     cod_produto INT NULL,
     id_servico INT NULL,
+    cod_agendamento INT NULL,
     quantidade INT NULL,
     descricao VARCHAR(120) NOT NULL,
     valor DECIMAL(10,2) NOT NULL,
@@ -566,11 +567,11 @@ CREATE TABLE IF NOT EXISTS caixa (
     CONSTRAINT chk_caixa_origem CHECK (origem IN ('PRODUTO','SERVICO')),
     CONSTRAINT chk_caixa_valor CHECK (valor > 0),
     CONSTRAINT chk_caixa_qtd CHECK (quantidade IS NULL OR quantidade > 0),
-    CONSTRAINT fk_caixa_produto
-    FOREIGN KEY (cod_produto) REFERENCES produto(cod_produto),
-    CONSTRAINT fk_caixa_servico
-    FOREIGN KEY (id_servico) REFERENCES servicos(id_servico)
-    );
+    CONSTRAINT fk_caixa_produto FOREIGN KEY (cod_produto) REFERENCES produto(cod_produto),
+    CONSTRAINT fk_caixa_servico FOREIGN KEY (id_servico) REFERENCES servicos(id_servico),
+    CONSTRAINT fk_caixa_agendamento FOREIGN KEY (cod_agendamento) REFERENCES agendamento(cod_agendamento),
+    CONSTRAINT uq_caixa_agendamento UNIQUE (cod_agendamento)
+);
 
 DELIMITER $$
 
@@ -590,119 +591,110 @@ CREATE PROCEDURE proc_ins_caixa(
     IN p_id_servico INT,
     IN p_quantidade INT,
     IN p_descricao VARCHAR(120),
-    IN p_valor DECIMAL(10,2)
+    IN p_valor DECIMAL(10,2),
+    IN p_cod_agendamento INT
 )
 BEGIN
-DECLARE v_estoque INT DEFAULT NULL;
-DECLARE v_saldo DECIMAL(12,2) DEFAULT 0;
-DECLARE v_valor_unitario DECIMAL(10,2) DEFAULT NULL;
-DECLARE v_valor_total DECIMAL(10,2) DEFAULT 0;
+    DECLARE v_estoque INT DEFAULT NULL;
+    DECLARE v_saldo DECIMAL(12,2) DEFAULT 0;
+    DECLARE v_valor_unitario DECIMAL(10,2) DEFAULT NULL;
+    DECLARE v_valor_total DECIMAL(10,2) DEFAULT 0;
+    DECLARE v_id_servico INT DEFAULT NULL;
 
-DECLARE EXIT HANDLER FOR SQLEXCEPTION
-BEGIN
-ROLLBACK;
-RESIGNAL;
-END;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
 
-IF p_tipo IS NULL OR p_tipo NOT IN ('ENTRADA','SAIDA') THEN
-SIGNAL SQLSTATE '45000'
-SET MESSAGE_TEXT = 'Tipo invalido: use ENTRADA ou SAIDA';
-END IF;
+    IF p_tipo IS NULL OR p_tipo NOT IN ('ENTRADA','SAIDA') THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Tipo invalido';
+    END IF;
+    IF p_origem IS NULL OR p_origem NOT IN ('PRODUTO','SERVICO') THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Origem invalida';
+    END IF;
+    IF p_descricao IS NULL OR TRIM(p_descricao) = '' THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'A descricao e obrigatoria';
+    END IF;
 
-IF p_origem IS NULL OR p_origem NOT IN ('PRODUTO','SERVICO') THEN
-SIGNAL SQLSTATE '45000'
-SET MESSAGE_TEXT = 'Origem invalida: use PRODUTO ou SERVICO';
-END IF;
+    START TRANSACTION;
 
-IF p_descricao IS NULL OR TRIM(p_descricao) = '' THEN
-SIGNAL SQLSTATE '45000'
-SET MESSAGE_TEXT = 'A descricao e obrigatoria';
-END IF;
+    IF p_origem = 'PRODUTO' THEN
+        IF p_id_servico IS NOT NULL OR p_cod_agendamento IS NOT NULL THEN
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Produto nao utiliza agendamento ou servico';
+        END IF;
+        IF p_quantidade IS NULL OR p_quantidade <= 0 THEN
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'A quantidade deve ser maior que zero';
+        END IF;
+        SELECT estoque,
+               CASE WHEN p_tipo = 'ENTRADA' THEN valorDeVenda ELSE valorBruto END
+          INTO v_estoque, v_valor_unitario
+          FROM produto WHERE cod_produto = p_cod_produto FOR UPDATE;
+        IF v_estoque IS NULL THEN
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Produto nao encontrado';
+        END IF;
+        IF p_tipo = 'ENTRADA' AND v_estoque < p_quantidade THEN
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Estoque insuficiente para a venda';
+        END IF;
+        SET v_valor_total = v_valor_unitario * p_quantidade;
+    ELSE
+        IF p_cod_agendamento IS NULL OR p_id_servico IS NULL THEN
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Selecione um agendamento';
+        END IF;
+        IF p_cod_produto IS NOT NULL OR p_quantidade IS NOT NULL THEN
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Servico nao utiliza produto ou quantidade';
+        END IF;
+        SELECT a.id_servico, s.vl_valor
+          INTO v_id_servico, v_valor_total
+          FROM agendamento a
+          INNER JOIN servicos s ON s.id_servico = a.id_servico
+         WHERE a.cod_agendamento = p_cod_agendamento
+         FOR UPDATE;
+        IF v_id_servico IS NULL OR v_id_servico <> p_id_servico THEN
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Agendamento ou servico invalido';
+        END IF;
+        IF EXISTS (SELECT 1 FROM caixa WHERE cod_agendamento = p_cod_agendamento) THEN
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Este agendamento ja foi lancado no caixa';
+        END IF;
+    END IF;
 
-START TRANSACTION;
+    IF v_valor_total IS NULL OR v_valor_total <= 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'O valor cadastrado deve ser maior que zero';
+    END IF;
 
-IF p_origem = 'PRODUTO' THEN
-IF p_id_servico IS NOT NULL THEN
-SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Informe somente produto para origem PRODUTO';
-END IF;
-IF p_quantidade IS NULL OR p_quantidade <= 0 THEN
-SIGNAL SQLSTATE '45000'
-SET MESSAGE_TEXT = 'A quantidade deve ser maior que zero';
-END IF;
+    IF p_tipo = 'SAIDA' THEN
+        SELECT COALESCE(SUM(CASE WHEN tipo = 'ENTRADA' THEN valor ELSE -valor END), 0)
+          INTO v_saldo FROM caixa;
+        IF v_valor_total > v_saldo THEN
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'A saida nao pode ser maior que o saldo disponivel';
+        END IF;
+    END IF;
 
-SELECT estoque,
-       CASE WHEN p_tipo = 'ENTRADA' THEN valorDeVenda ELSE valorBruto END
-INTO v_estoque, v_valor_unitario
-FROM produto WHERE cod_produto = p_cod_produto FOR UPDATE;
+    IF p_origem = 'PRODUTO' THEN
+        UPDATE produto
+           SET estoque = CASE WHEN p_tipo = 'ENTRADA' THEN estoque - p_quantidade
+                              ELSE estoque + p_quantidade END
+         WHERE cod_produto = p_cod_produto;
+    END IF;
 
-IF v_estoque IS NULL THEN
-SIGNAL SQLSTATE '45000'
-SET MESSAGE_TEXT = 'Produto nao encontrado';
-END IF;
+    INSERT INTO caixa (tipo, origem, cod_produto, id_servico, cod_agendamento, quantidade, descricao, valor)
+    VALUES (p_tipo, p_origem, p_cod_produto, v_id_servico, p_cod_agendamento, p_quantidade, TRIM(p_descricao), v_valor_total);
 
-IF p_tipo = 'ENTRADA' AND v_estoque < p_quantidade THEN
-SIGNAL SQLSTATE '45000'
-SET MESSAGE_TEXT = 'Estoque insuficiente para a venda';
-END IF;
-END IF;
-
-IF p_origem = 'SERVICO' THEN
-    IF p_id_servico IS NULL OR NOT EXISTS (SELECT 1 FROM servicos WHERE id_servico = p_id_servico) THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Selecione um servico cadastrado';
-END IF;
-    IF p_cod_produto IS NOT NULL OR p_quantidade IS NOT NULL THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Servico nao utiliza produto ou quantidade';
-END IF;
-END IF;
-
-IF p_origem = 'PRODUTO' THEN
-    SET v_valor_total = v_valor_unitario * p_quantidade;
-ELSE
-SELECT vl_valor INTO v_valor_unitario
-FROM servicos WHERE id_servico = p_id_servico;
-SET v_valor_total = v_valor_unitario;
-END IF;
-
-IF v_valor_total IS NULL OR v_valor_total <= 0 THEN
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'O valor cadastrado deve ser maior que zero';
-END IF;
-
-IF p_tipo = 'SAIDA' THEN
-SELECT COALESCE(SUM(CASE WHEN tipo = 'ENTRADA' THEN valor ELSE -valor END), 0)
-INTO v_saldo FROM caixa;
-
-IF v_valor_total > v_saldo THEN
-SIGNAL SQLSTATE '45000'
-SET MESSAGE_TEXT = 'A saida nao pode ser maior que o saldo disponivel';
-END IF;
-END IF;
-
-IF p_origem = 'PRODUTO' THEN
-UPDATE produto
-SET estoque = CASE WHEN p_tipo = 'ENTRADA'
-                       THEN estoque - p_quantidade
-                   ELSE estoque + p_quantidade END
-WHERE cod_produto = p_cod_produto;
-
-INSERT INTO caixa (tipo, origem, cod_produto, id_servico, quantidade, descricao, valor)
-VALUES (p_tipo, p_origem, p_cod_produto, NULL, p_quantidade, TRIM(p_descricao), v_valor_total);
-ELSE
-INSERT INTO caixa (tipo, origem, cod_produto, id_servico, quantidade, descricao, valor)
-VALUES (p_tipo, p_origem, NULL, p_id_servico, NULL, TRIM(p_descricao), v_valor_total);
-END IF;
-
-COMMIT;
+    COMMIT;
 END$$
 
 CREATE PROCEDURE proc_selc_caixa()
 BEGIN
-SELECT c.cod_mov, c.data_hora, c.tipo, c.origem,
-       c.cod_produto, p.nome_prod, c.id_servico, s.nm_servico,
-       c.quantidade, c.descricao, c.valor
-FROM caixa c
-         LEFT JOIN produto p ON p.cod_produto = c.cod_produto
-         LEFT JOIN servicos s ON s.id_servico = c.id_servico
-ORDER BY c.data_hora DESC, c.cod_mov DESC;
+    SELECT c.cod_mov, c.data_hora, c.tipo, c.origem,
+           c.cod_produto, p.nome_prod, c.id_servico, s.nm_servico,
+           c.cod_agendamento, cl.c_nome AS nome_cliente,
+           c.quantidade, c.descricao, c.valor
+      FROM caixa c
+      LEFT JOIN produto p ON p.cod_produto = c.cod_produto
+      LEFT JOIN servicos s ON s.id_servico = c.id_servico
+      LEFT JOIN agendamento a ON a.cod_agendamento = c.cod_agendamento
+      LEFT JOIN cliente cl ON cl.cod_cliente = a.cod_cliente
+     ORDER BY c.data_hora DESC, c.cod_mov DESC;
 END$$
 
 DELIMITER ;
